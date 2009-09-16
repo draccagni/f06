@@ -164,9 +164,6 @@ class BundleClassLoader extends SecureClassLoader {
 	
 	// Waiting for Generics
 	Object find1(String name, Class tClazz) throws Exception {
-		if (name.equals("osgi.test_00003.A")) {
-			int a = 1;
-		}
 		if (tClazz == Class.class) {
 	        Class c = findLoadedClass(name);
 	        if (c != null) {
@@ -491,23 +488,22 @@ class BundleClassLoader extends SecureClassLoader {
 					definePackage(pkgName, null, null, null, null, null, null, null);
 				}
 				
-				byte[] buffer = IOUtil.getBytes(url.openStream());
+				byte[] b = IOUtil.getBytes(url.openStream());
 				
 				/*
 				 * Each bundle has its own protection domain.
 				 */
 				ProtectionDomain protectionDomain = framework.getProtectionDomain(bundle);				
-				Class clazz = defineClass(name, buffer, 0, buffer.length, protectionDomain);
+				Class clazz = defineClass(name, b, 0, b.length, protectionDomain);
 				
-				// XXX After class defining
 				/*
-				 * 4.3.7.1   Lazy Activation Policy
+				 * 4.4.6.2   Lazy Activation Policy
 				 * 
 				 * A lazy activation policy indicates that the bundle, once started, must not be
 				 * activated until a class is loaded from it; either during normal class loading or
-				 * via the Bundle loadClass method.
+				 * via the Bundle loadClass method. (...) When a class load triggers the lazy activation,
+				 * the Framework must first define the triggering class.
 				 * 
-				 * Figure 4.27
 				 */
 				
 				if (
