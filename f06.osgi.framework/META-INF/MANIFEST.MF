@@ -1,0 +1,2 @@
+Main-Class: f06.osgi.framework.launch.Launcher
+
