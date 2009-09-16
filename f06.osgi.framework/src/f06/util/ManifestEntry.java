@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import f06.commons.util.ArrayUtil;
-
 
 
 public class ManifestEntry {
