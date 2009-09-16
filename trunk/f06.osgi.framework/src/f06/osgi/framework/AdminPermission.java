@@ -21,7 +21,7 @@ import java.util.Dictionary;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
-import f06.commons.util.CaseSensitiveDictionary;
+import f06.util.CaseSensitiveDictionary;
 
 public final class AdminPermission extends Permission {
 

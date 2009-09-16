@@ -54,10 +54,10 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.permissionadmin.PermissionInfo;
 import org.osgi.service.startlevel.StartLevel;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.CaseSensitiveDictionary;
-import f06.commons.util.IOUtil;
-import f06.commons.util.ManifestEntry;
+import f06.util.ArrayUtil;
+import f06.util.CaseSensitiveDictionary;
+import f06.util.IOUtil;
+import f06.util.ManifestEntry;
 
 /*
  * 4.4.2 Persistent Storage
@@ -463,7 +463,7 @@ class Storage {
 					is = url.openStream();
 				}
 
-				byte[] byteArray = IOUtil.getByteArray(is);
+				byte[] byteArray = IOUtil.getBytes(is);
 				is.close();
 
 				/*
@@ -742,7 +742,7 @@ class Storage {
 			Dictionary currentHeaders = bundle.getHeaders();
 			Version currentVersion = Version.parseVersion((String) currentHeaders.get(Constants.BUNDLE_VERSION));
 			try {
-				byte[] byteArray = IOUtil.getByteArray(is);
+				byte[] byteArray = IOUtil.getBytes(is);
 				is.close();
 
 				/*

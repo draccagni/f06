@@ -40,10 +40,10 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.ManifestEntry;
-import f06.commons.util.TextUtil;
-import f06.commons.util.ThreadExecutor;
+import f06.util.ArrayUtil;
+import f06.util.ManifestEntry;
+import f06.util.TextUtil;
+import f06.util.ThreadExecutor;
 
 /*
  * 7.1.3  PackageAdmin (...) provides access to the internal structures of the Framework

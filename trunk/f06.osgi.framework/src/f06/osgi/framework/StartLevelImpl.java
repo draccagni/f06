@@ -26,7 +26,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-import f06.commons.util.ThreadExecutor;
+import f06.util.ThreadExecutor;
 
 
 public class StartLevelImpl implements StartLevel {

@@ -32,7 +32,7 @@ import java.util.zip.ZipEntry;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
-import f06.commons.util.TextUtil;
+import f06.util.TextUtil;
 
 /*
  * BundleContent is defined for each bundle (host and fragment bundle) and permits

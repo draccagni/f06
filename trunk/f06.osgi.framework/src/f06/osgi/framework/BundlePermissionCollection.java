@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.osgi.service.permissionadmin.PermissionInfo;
 
-import f06.commons.util.ArrayUtil;
+import f06.util.ArrayUtil;
 
 public class BundlePermissionCollection extends PermissionCollection {
 

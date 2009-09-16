@@ -27,7 +27,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
-import f06.commons.util.ManifestEntry;
+import f06.util.ManifestEntry;
 
 
 public class FrameworkUtil {

@@ -44,8 +44,8 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.CaseSensitiveDictionary;
+import f06.util.ArrayUtil;
+import f06.util.CaseSensitiveDictionary;
 
 /*
  * Technical Whitepaper 

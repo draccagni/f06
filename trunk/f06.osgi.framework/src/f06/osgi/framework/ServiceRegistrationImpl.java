@@ -23,7 +23,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
-import f06.commons.util.CaseSensitiveDictionary;
+import f06.util.CaseSensitiveDictionary;
 
 class ServiceRegistrationImpl implements ServiceRegistration {
 

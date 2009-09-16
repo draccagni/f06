@@ -31,10 +31,10 @@ import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.packageadmin.RequiredBundle;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.IOUtil;
-import f06.commons.util.ManifestEntry;
-import f06.commons.util.TextUtil;
+import f06.util.ArrayUtil;
+import f06.util.IOUtil;
+import f06.util.ManifestEntry;
+import f06.util.TextUtil;
 
 class BundleClassLoader extends SecureClassLoader {
 
@@ -491,7 +491,7 @@ class BundleClassLoader extends SecureClassLoader {
 					definePackage(pkgName, null, null, null, null, null, null, null);
 				}
 				
-				byte[] buffer = IOUtil.getByteArray(url.openStream());
+				byte[] buffer = IOUtil.getBytes(url.openStream());
 				
 				/*
 				 * Each bundle has its own protection domain.
