@@ -133,7 +133,7 @@ class PackageAdminImpl implements PackageAdmin {
 			Bundle bundle = bundles[i];
 			String bundleSymbolicName = bundle.getSymbolicName();
 
-			Version version = Version.parseVersion((String) bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+			Version version = bundle.getVersion();
 
 			if (symbolicName.equals(bundleSymbolicName) && versionRange0.isIncluded(version)) {
 				list.add(bundle);

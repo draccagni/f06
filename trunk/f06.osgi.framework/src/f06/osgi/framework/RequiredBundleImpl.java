@@ -45,7 +45,7 @@ class RequiredBundleImpl implements RequiredBundle {
 	}
 
 	public Version getVersion() {
-		return Version.parseVersion((String) bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+		return bundle.getVersion();
 	}
 
 	public boolean isRemovalPending() {

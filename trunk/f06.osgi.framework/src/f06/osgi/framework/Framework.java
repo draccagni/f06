@@ -635,8 +635,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 	}
 
 	BundleURLClassPath getBundleURLClassPath(Bundle bundle) {
-		return getBundleURLClassPath(bundle,
-				Version.parseVersion((String) bundle.getHeaders().get(Constants.BUNDLE_VERSION)));
+		return getBundleURLClassPath(bundle, bundle.getVersion());
 	}
 
 	BundleURLClassPath getBundleURLClassPath(Bundle bundle, Version version) {
@@ -1511,7 +1510,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		
 		BundleContext context = framework.getBundleContext();
 		
-		Version hostVersion = Version.parseVersion((String) bundle.getHeaders().get(Constants.BUNDLE_VERSION));
+		Version hostVersion = bundle.getVersion();
 		
 		Bundle[] bundles = context.getBundles();
 		

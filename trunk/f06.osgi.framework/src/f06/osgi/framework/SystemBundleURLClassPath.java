@@ -38,7 +38,7 @@ class SystemBundleURLClassPath implements BundleURLClassPath {
 	public SystemBundleURLClassPath(Framework framework) throws IOException {
 		this.framework = framework;
 		
-		this.version = Version.parseVersion((String) framework.getHeaders().get(Constants.BUNDLE_VERSION));
+		this.version = framework.getVersion();
 	}
 
 	public synchronized URL getEntry(String name) {
