@@ -1,0 +1,43 @@
+<project default="all" basedir=".">
+	<property file="project.properties"/>
+
+	<property name="bin.dir" value="bin" />
+	<property name="manifest.dir" value="." />
+	<property name="distro.dir" value="distro" />
+
+	<target name="clean">
+		<delete dir="${distro.dir}" />
+	</target>
+
+	<target name="init">
+		<mkdir dir="${distro.dir}" />
+	</target>
+
+	<target name="all" depends="clean">
+		<antcall target="init" />
+		<antcall target="jar" />
+	</target>
+	
+	<!-- JAR the bundle. -->
+	<target name="jar" depends="init">
+		<!-- JAR the output directory -->
+		<jar jarfile="${distro.dir}/${framework.name}.jar" basedir="${bin.dir}">
+			<include name="org/osgi/**" />
+			<include name="f06/osgi/framework/*" />
+			<include name="f06/commons/util/**" />
+			<include name="f06/osgi/framework/launch/FrameworkFactory.class" />
+			<fileset dir="${bin.dir}">
+				<include name="META-INF/**" />
+			</fileset>
+		</jar>
+
+		<jar jarfile="${distro.dir}/${launcher.name}.jar" basedir="${bin.dir}">
+			<include name="f06/osgi/framework/launch/Launcher.class" />
+		</jar>
+
+		<jar manifest="${manifest.dir}/META-INF/MANIFEST.MF" jarfile="${distro.dir}/${commons.name}.jar" basedir="${bin.dir}">
+			<include name="f06/commons/util/**" />
+		</jar>
+	</target>
+
+</project>
