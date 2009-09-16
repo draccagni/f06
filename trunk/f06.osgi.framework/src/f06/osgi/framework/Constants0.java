@@ -33,7 +33,7 @@ public interface Constants0 {
 	final static String BUNDLE_FILE_NAME                        = "file";
 
 	final static String SYSTEM_BUNDLE_SYMBOLICNAME              = "system.bundle";
-	final static String SYSTEM_BUNDLE_NAME                      = "F06 OSGi Platform Implementation R4.2";
+	final static String SYSTEM_BUNDLE_NAME                      = "F06 R4.2";
 	final static String SYSTEM_BUNDLE_VERSION                   = "0.9.2";
 	final static String SYSTEM_BUNDLE_DOCURL                    = "http://www.davideraccagni.com";
 	final static String SYSTEM_BUNDLE_VENDOR                    = "Davide Raccagni";
