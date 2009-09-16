@@ -82,7 +82,6 @@ class HostBundle extends AbstractBundle {
 			}
 		}
 		
-//		BundleClassLoader classLoader = framework.getBundleClassLoader(this);
 		BundleClassLoader classLoader = getBundleClassLoader();
 		
 		return classLoader.getResource(name);
@@ -110,7 +109,6 @@ class HostBundle extends AbstractBundle {
 			}
 		}
 
-//		BundleClassLoader classLoader = framework.getBundleClassLoader(this);
 		BundleClassLoader classLoader = getBundleClassLoader();
 		
 		return classLoader.getResources(name);
@@ -276,47 +274,45 @@ class HostBundle extends AbstractBundle {
 	    		return;
     	    }
 	    }
-//	    if (framework.getBundleStartLevel(this) <= framework.getStartLevel()) {
-			/*
-			 * 4.3.7.1  When a bundle is started using a lazy
-			 * activation policy, the following steps must be taken:
-			 * 
-			 *   A Bundle Context is created for the bundle.
-			 *   
-			 *   The bundle state is moved to the STARTING state.
-			 */
-			BundleContext context = framework.createBundleContext(this);
-			setBundleContext(context);
-			
-			setState(STARTING);
-			
-	        if (framework.isBundleActivationPolicyUsed(this)) {
-	        	String activationPolicy = (String) getHeaders().get(Constants.BUNDLE_ACTIVATIONPOLICY);
-	        	if (activationPolicy != null) {
-	    			/*
-	    			 * 4.3.7.1  The LAZY_ACTIVATION event is fired.
-	    			 *   
-	    			 *          The system waits for a class load from the bundle to occur.
-	    			 */
-	    			BundleEvent eventStarting = new BundleEvent(BundleEvent.LAZY_ACTIVATION, this);
-	    			framework.postBundleEvent(eventStarting);
-	        	} else {
-	    			/*
-	    			 * 4.3.7  If no Bundle-ActivationPolicy header is specified, the bundle will use eager 
-	    			 * activation.
-	    			 */
-	        		activate();
-	        	}
-	        } else {
-	        	/*
-	        	 * 4.3.5  0 – Start the bundle with eager activation and set the autostart setting to
-	        	 * Started with eager activation. If the bundle was already started with the
-	        	 * lazy activation policy and is awaiting activation, then it must be activated
-	        	 * immediately.
-	        	 */
-	        	activate();
-	        }
-//	    }
+		/*
+		 * 4.3.7.1  When a bundle is started using a lazy
+		 * activation policy, the following steps must be taken:
+		 * 
+		 *   A Bundle Context is created for the bundle.
+		 *   
+		 *   The bundle state is moved to the STARTING state.
+		 */
+		BundleContext context = framework.createBundleContext(this);
+		setBundleContext(context);
+		
+		setState(STARTING);
+		
+        if (framework.isBundleActivationPolicyUsed(this)) {
+        	String activationPolicy = (String) getHeaders().get(Constants.BUNDLE_ACTIVATIONPOLICY);
+        	if (activationPolicy != null) {
+    			/*
+    			 * 4.3.7.1  The LAZY_ACTIVATION event is fired.
+    			 *   
+    			 *          The system waits for a class load from the bundle to occur.
+    			 */
+    			BundleEvent eventStarting = new BundleEvent(BundleEvent.LAZY_ACTIVATION, this);
+    			framework.postBundleEvent(eventStarting);
+        	} else {
+    			/*
+    			 * 4.3.7  If no Bundle-ActivationPolicy header is specified, the bundle will use eager 
+    			 * activation.
+    			 */
+        		activate();
+        	}
+        } else {
+        	/*
+        	 * 4.3.5  0 – Start the bundle with eager activation and set the autostart setting to
+        	 * Started with eager activation. If the bundle was already started with the
+        	 * lazy activation policy and is awaiting activation, then it must be activated
+        	 * immediately.
+        	 */
+        	activate();
+        }
 	}
 	
 	void activate() throws BundleException {
@@ -361,7 +357,6 @@ class HostBundle extends AbstractBundle {
 						 * Cannot use {@link Bundle#loadClass loadClass} method because
 						 * it would lead to a never ending recursice call (see {@link #START_ACTIVATION_POLICY})
 						 */
-//						BundleClassLoader classLoader = framework.getBundleClassLoader(HostBundle.this);
 						BundleClassLoader classLoader = getBundleClassLoader();
 						
 						Class cls = classLoader.loadClass(className);
