@@ -47,12 +47,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
-import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.log.LogService;
 import org.osgi.service.permissionadmin.PermissionInfo;
-import org.osgi.service.startlevel.StartLevel;
 
 import f06.util.ArrayUtil;
 import f06.util.CaseSensitiveDictionary;
@@ -828,9 +825,6 @@ class Storage {
 		headers.put(Constants.BUNDLE_VENDOR, Constants0.SYSTEM_BUNDLE_VENDOR);
 		headers.put(Constants.BUNDLE_COPYRIGHT,
 				Constants0.SYSTEM_BUNDLE_COPYRIGHT);
-		
-		headers.put(ComponentConstants.SERVICE_COMPONENT,
-				"OSGI-INF/startlevel.xml, OSGI-INF/eventadmin.xml");
 		
 		/*
 		 * 3.8.5 (...) The system property
