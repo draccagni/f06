@@ -150,7 +150,6 @@ class HostBundle extends AbstractBundle {
 			throw new IllegalStateException(new StringBuilder("Attempting to load a class from uninstalled Bundle(id=").append(getBundleId()).append(").").toString());
 		}
 		
-//		BundleClassLoader classLoader = framework.getBundleClassLoader(this);
 		BundleClassLoader classLoader = getBundleClassLoader();
 		
 		return classLoader.loadClass(name);
@@ -660,8 +659,7 @@ class HostBundle extends AbstractBundle {
 			if (removable) {
 				framework.unresolveBundle(this);
 				
-				classLoader = null;
-//				framework.removeBundleClassLoader(this);
+				setBundleClassLoader(null);
 				
 				framework.remove(this);
 			}
