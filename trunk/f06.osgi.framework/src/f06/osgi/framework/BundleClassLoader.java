@@ -504,6 +504,9 @@ class BundleClassLoader extends SecureClassLoader {
 				 * via the Bundle loadClass method. (...) When a class load triggers the lazy activation,
 				 * the Framework must first define the triggering class.
 				 * 
+				 * XXX
+				 * If update() method is invoked, the bundle is started with options = 0 and so it is 
+				 * immediately activated.
 				 */
 				
 				if (
@@ -523,40 +526,31 @@ class BundleClassLoader extends SecureClassLoader {
 				    	if (activationPolicy != null) {
 				        	ManifestEntry entry = ManifestEntry.parseEntry(activationPolicy)[0];
 				    		
-							String[] include;
-							if (entry.hasAttribute(Constants.INCLUDE_DIRECTIVE)) {
-								include = entry.getAttributeValue(Constants.INCLUDE_DIRECTIVE).split("\\,");
-							} else {
-								include = new String[] {
-									"*"
-								};
-							}
+							boolean matched = true;
 
-							String[] exclude;
 							if (entry.hasAttribute(Constants.EXCLUDE_DIRECTIVE)) {
-								exclude = entry.getAttributeValue(Constants.EXCLUDE_DIRECTIVE).split("\\,");
-							} else {
-								exclude = new String[0];
-							}
-
-							boolean matched = false;
-							
-							for (int i = 0; i < exclude.length; i++) {
-								String path = exclude[i];
-								if (TextUtil.wildcardCompare(path, name) == 0) {
-									matched = true;
-									
-									break;
+								String[] exclude = entry.getAttributeValue(Constants.EXCLUDE_DIRECTIVE).split("\\,");
+								for (int i = 0; i < exclude.length; i++) {
+									String path = exclude[i];
+									if (TextUtil.wildcardCompare(path, name) != 0) {
+										matched = false;
+										
+										break;
+									}
 								}
 							}
 							
-							if (!matched) {
-								for (int i = 0; i < include.length; i++) {
-									String path = include[i];
-									if (TextUtil.wildcardCompare(path, name) == 0) {
-										matched = true;
-										
-										break;
+							if (matched) {
+								String[] include;
+								if (entry.hasAttribute(Constants.INCLUDE_DIRECTIVE)) {
+									include = entry.getAttributeValue(Constants.INCLUDE_DIRECTIVE).split("\\,");
+									for (int i = 0; i < include.length; i++) {
+										String path = include[i];
+										if (TextUtil.wildcardCompare(path, name) != 0) {
+											matched = false;
+											
+											break;
+										}
 									}
 								}
 							}
@@ -606,11 +600,6 @@ class BundleClassLoader extends SecureClassLoader {
      */
     
 	protected Class loadClass(String name, boolean resolve)	throws ClassNotFoundException {
-		if (name.equals("osgi.test_00003.A")) {
-			int a = 1;
-		}
-		
-		
     	Class c = findLoadedClass(name);
 		if (c == null) {
 			try {
@@ -618,8 +607,6 @@ class BundleClassLoader extends SecureClassLoader {
 				if (c == null) {
 					throw new ClassNotFoundException(name);
 				}
-				
-//				ClassLoader cl = c.getClassLoader();
 			} catch (Exception e) {
 				throw new ClassNotFoundException(e.getMessage(), e);
 			}

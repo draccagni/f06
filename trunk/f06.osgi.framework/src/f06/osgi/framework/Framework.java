@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Davide Raccagni (2006, 2008). All Rights Reserved.
+ * Copyright (c) Davide Raccagni (2006, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,11 @@
  */
 package f06.osgi.framework;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.CodeSource;
@@ -25,17 +27,16 @@ import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.osgi.framework.AdminPermission;
@@ -50,7 +51,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.PackagePermission;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServicePermission;
@@ -283,7 +283,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 					packageAdmin, 
 					null);
 
-			packageAdmin.resolveBundles(new Bundle[] { this });
+			resolve();
 
 			/*
 			 * 10.1.3  The Permission Admin service is registered by the Framework’s system bundle
@@ -1265,6 +1265,82 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		LogService logService = (LogService) logServiceTracker.getService();
 		if (logService != null) {
 			logService.log(level, message, exception);
+		} else {
+			StringBuilder sb = new StringBuilder();
+			
+			Calendar calendar = Calendar.getInstance();
+			
+			sb.append(calendar.get(Calendar.YEAR));
+			sb.append('-');
+			int month = calendar.get(Calendar.MONTH) + 1;
+			if (month < 10) {
+				sb.append('0');
+			}
+			sb.append(month);
+			sb.append('-');
+			int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+			if (dayOfMonth < 10) {
+				sb.append('0');
+			}
+			sb.append(dayOfMonth);
+			sb.append(' ');
+			int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+			if (hourOfDay < 10) {
+				sb.append('0');
+			}
+			sb.append(hourOfDay);
+			sb.append(':');
+			int minute = calendar.get(Calendar.MINUTE);
+			if (minute < 10) {
+				sb.append('0');
+			}
+			sb.append(minute);
+			sb.append(':');
+			int second = calendar.get(Calendar.SECOND);
+			if (second < 10) {
+				sb.append('0');
+			}
+			sb.append(second);
+			sb.append('.');
+			int millisecond = calendar.get(Calendar.MILLISECOND);
+			if (millisecond < 100) {
+				sb.append('0');
+
+				if (millisecond < 10) {
+					sb.append('0');
+				}
+			}
+			sb.append(millisecond);
+
+			sb.append(" ");
+			
+			switch (level) {
+			case LogService.LOG_ERROR:
+				sb.append("ERROR");
+				break;
+			case LogService.LOG_WARNING:
+				sb.append("WARNING");
+				break;
+			case LogService.LOG_INFO:
+				sb.append("INFO");
+				break;
+			default:
+				sb.append("DEBUG");
+				break;
+			}
+			
+			sb.append(": ");
+
+			sb.append(message);
+			
+			if (exception != null) {
+				sb.append("\n");
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				exception.printStackTrace(new PrintStream(baos));
+				sb.append(baos.toString());
+			}
+			
+			System.err.println(sb.toString());
 		}
 	}
 

@@ -295,7 +295,7 @@ abstract class AbstractBundle implements Bundle {
 	public abstract Class loadClass(String name) throws ClassNotFoundException;
 
 	public void start() throws BundleException {
-		start(START_ACTIVATION_POLICY);
+		start(0);
 	}
 
 	public abstract void start(int options) throws BundleException;

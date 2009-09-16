@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Davide Raccagni (2006, 2008). All Rights Reserved.
+ * Copyright (c) Davide Raccagni (2006, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,6 @@
  */
 package f06.osgi.framework;
 
-import java.net.URL;
-import java.security.ProtectionDomain;
-
-import org.osgi.framework.Bundle;
-
-import f06.util.IOUtil;
 
 class SystemBundleClassLoader extends BundleClassLoader {
 	
