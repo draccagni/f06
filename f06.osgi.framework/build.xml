@@ -22,9 +22,9 @@
 	<target name="jar" depends="init">
 		<!-- JAR the output directory -->
 		<jar jarfile="${distro.dir}/${framework.name}.jar" basedir="${bin.dir}">
+			<include name="f06/util/**" />
 			<include name="org/osgi/**" />
 			<include name="f06/osgi/framework/*" />
-			<include name="f06/commons/util/**" />
 			<include name="f06/osgi/framework/launch/FrameworkFactory.class" />
 			<fileset dir="${bin.dir}">
 				<include name="META-INF/**" />
@@ -35,8 +35,11 @@
 			<include name="f06/osgi/framework/launch/Launcher.class" />
 		</jar>
 
-		<jar manifest="${manifest.dir}/META-INF/MANIFEST.MF" jarfile="${distro.dir}/${commons.name}.jar" basedir="${bin.dir}">
-			<include name="f06/commons/util/**" />
+		<jar manifest="${manifest.dir}/META-INF/MANIFEST.MF" jarfile="${distro.dir}/${distro.name}.jar" basedir="${bin.dir}">
+			<include name="**/**" />
+			<fileset dir="${bin.dir}">
+				<include name="META-INF/**" />
+			</fileset>
 		</jar>
 	</target>
 
