@@ -28,9 +28,9 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.CaseSensitiveDictionary;
-import f06.commons.util.TextUtil;
+import f06.util.ArrayUtil;
+import f06.util.CaseSensitiveDictionary;
+import f06.util.TextUtil;
 
 
 class RFC1960Filter implements Filter {

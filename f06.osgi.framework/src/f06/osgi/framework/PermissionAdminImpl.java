@@ -23,7 +23,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.permissionadmin.PermissionAdmin;
 import org.osgi.service.permissionadmin.PermissionInfo;
 
-import f06.commons.util.ArrayUtil;
+import f06.util.ArrayUtil;
 
 
 class PermissionAdminImpl implements PermissionAdmin {

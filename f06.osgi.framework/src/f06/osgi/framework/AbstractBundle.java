@@ -37,7 +37,7 @@ import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import f06.commons.util.CaseSensitiveDictionary;
+import f06.util.CaseSensitiveDictionary;
 
 abstract class AbstractBundle implements Bundle {
 

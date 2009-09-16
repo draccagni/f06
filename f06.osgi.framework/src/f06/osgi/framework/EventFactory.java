@@ -25,7 +25,7 @@ import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 
-import f06.commons.util.CaseSensitiveDictionary;
+import f06.util.CaseSensitiveDictionary;
 
 
 class EventFactory {

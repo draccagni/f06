@@ -21,7 +21,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 
-import f06.commons.util.ArrayUtil;
+import f06.util.ArrayUtil;
 
 class ServiceReferenceImpl implements ServiceReference {
 	

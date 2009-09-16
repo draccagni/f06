@@ -32,7 +32,7 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.PackageAdmin;
 
-import f06.commons.util.ManifestEntry;
+import f06.util.ManifestEntry;
 
 class FragmentBundle extends AbstractBundle {
 	

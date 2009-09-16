@@ -20,7 +20,7 @@ import java.security.ProtectionDomain;
 
 import org.osgi.framework.Bundle;
 
-import f06.commons.util.IOUtil;
+import f06.util.IOUtil;
 
 class SystemBundleClassLoader extends BundleClassLoader {
 	

@@ -77,10 +77,10 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.xml.XMLParserActivator;
 
-import f06.commons.util.ArrayUtil;
-import f06.commons.util.CaseSensitiveDictionary;
-import f06.commons.util.ManifestEntry;
-import f06.commons.util.TextUtil;
+import f06.util.ArrayUtil;
+import f06.util.CaseSensitiveDictionary;
+import f06.util.ManifestEntry;
+import f06.util.TextUtil;
 
 /*
  * 4.5  The System Bundle

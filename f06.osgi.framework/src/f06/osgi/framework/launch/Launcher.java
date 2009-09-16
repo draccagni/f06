@@ -15,7 +15,7 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-import f06.commons.util.ManifestEntry;
+import f06.util.ManifestEntry;
 
 public class Launcher {
 	
