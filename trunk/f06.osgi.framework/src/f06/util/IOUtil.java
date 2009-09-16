@@ -30,8 +30,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import f06.commons.util.CaseSensitiveDictionary;
-
 
 public class IOUtil {
 
