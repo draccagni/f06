@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) Davide Raccagni (2006, 2009). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package f06.osgi.framework.launch;
 
 import java.io.FileInputStream;
@@ -20,6 +35,7 @@ import f06.util.ManifestEntry;
 public class Launcher {
 	
 	public void launch(String args[]) throws Exception {
+		
 		String fc_path = "etc/framework.config";
 
 		String lc_path = "etc/launcher.config";
@@ -35,6 +51,8 @@ public class Launcher {
 
 		Properties configuration = loadConfiguration(fc_path);		
 		Framework framework = new f06.osgi.framework.launch.FrameworkFactory().newFramework(configuration);
+		System.out.println("F06 OSGi Platform Implementation - Licensed under Apache 2.0");
+
 		framework.start();
 
 		BundleContext context = framework.getBundleContext();
@@ -96,18 +114,28 @@ public class Launcher {
 		}
 	}
 	
-	private void launch0(BundleContext context, Object bundles) throws Exception {
-		ServiceReference packageAdminReference = context.getServiceReference(PackageAdmin.class.getName());
-		ServiceReference startLevelReference = context.getServiceReference(StartLevel.class.getName());
-		
-		PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminReference);
-		StartLevel startLevel = (StartLevel) context.getService(startLevelReference);
+	private void launch0(BundleContext context, Object additionalbundles) throws Exception {
+		if (additionalbundles != null) {
+			ServiceReference packageAdminReference = context.getServiceReference(PackageAdmin.class.getName());
+			PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminReference);
 
-		if (bundles != null) {
-			ManifestEntry[] entries = ManifestEntry.parseEntry(bundles);
-			for (int i = 0; i < entries.length; i++) {
+			ServiceReference startLevelReference = context.getServiceReference(StartLevel.class.getName());
+			StartLevel startLevel = (StartLevel) context.getService(startLevelReference);
+
+			Bundle[] bundles = context.getBundles();
+			
+			ManifestEntry[] entries = ManifestEntry.parseEntry(additionalbundles);
+			NEXT_BUNDLE: for (int i = 1; i < entries.length; i++) {
 				ManifestEntry entry = entries[i];
 				String location = entry.getName();
+				
+				for (int j = 0; j < bundles.length; j++) {
+					if (bundles[j].getLocation().equals(location)) {
+						bundles[j].update();
+						
+						continue NEXT_BUNDLE;
+					}
+				}
 			
 				try {
 					Bundle bundle = context.installBundle(location);
@@ -116,19 +144,19 @@ public class Launcher {
 					if (startlevel != null) {
 						startLevel.setBundleStartLevel(bundle, Integer.parseInt(startlevel));
 					}
+					
 					if (packageAdmin.getBundleType(bundle) != PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
 						bundle.start();
 					}
 				} catch (Exception e) {
-					// do nothing
+					e.printStackTrace();
 				}
 			}
-		}
-		
-		context.ungetService(packageAdminReference);
+			
+			context.ungetService(packageAdminReference);
 
-		context.ungetService(startLevelReference);
-		
+			context.ungetService(startLevelReference);
+		}
 	}
 	
 	private Properties loadConfiguration(String c_path) throws IOException {
