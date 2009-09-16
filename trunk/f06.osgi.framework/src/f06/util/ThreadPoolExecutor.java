@@ -72,6 +72,11 @@ public class ThreadPoolExecutor extends ThreadExecutor {
 				}
 			}
 			
+			// XXX instead of join in workers shutdown method 
+			while (!isIdle()) {
+				Thread.sleep(100);
+			}
+			
 			idleWorkers.discharge();
 		} catch (InterruptedException x) {
 			// do nothing
