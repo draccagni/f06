@@ -59,6 +59,12 @@ public class ThreadExecutor implements Runnable {
 				
 			synchronized (executionLock) {
 				internalThread.interrupt();
+				
+				try {
+					internalThread.join();
+				} catch (InterruptedException e) {
+					// do nothing
+				}
 
 				internalThread = null;
 			}
