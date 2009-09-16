@@ -800,7 +800,7 @@ class Storage {
 					}
 				}
 
-				throw new BundleException(e.getMessage());
+				throw new BundleException(e.getMessage(), e);
 			}
 		}
 	}
