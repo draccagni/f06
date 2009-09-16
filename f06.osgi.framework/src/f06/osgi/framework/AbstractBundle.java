@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 import java.util.jar.Attributes;
 
@@ -345,11 +346,8 @@ abstract class AbstractBundle implements Bundle {
 		sb.append(",name=");
 		sb.append(getSymbolicName());
 		
-		String version = (String) getHeaders().get(Constants.BUNDLE_VERSION);
-		if (version != null) {
-			sb.append(",version=");
-			sb.append(Version.parseVersion(version));
-		}
+		sb.append(",version=");
+		sb.append(getVersion());
 		sb.append(')');
 		
 		return sb.toString();
@@ -365,5 +363,14 @@ abstract class AbstractBundle implements Bundle {
 	
 	public void setStale(boolean stale) {
 		this.stale = stale;
+	}
+	
+	public Version getVersion() {
+		return Version.parseVersion((String) getHeaders().get(Constants.BUNDLE_VERSION));
+	}
+
+	public Map getSignerCertificates(int signersType) {
+		// XXX not yet implemented
+		return null;
 	}
 }

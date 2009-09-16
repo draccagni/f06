@@ -15,9 +15,11 @@
  */
 package f06.osgi.framework.launch;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Properties;
@@ -49,9 +51,10 @@ public class Launcher {
 			}
 		}
 
+		printLicense();
+
 		Properties configuration = loadConfiguration(fc_path);		
 		Framework framework = new f06.osgi.framework.launch.FrameworkFactory().newFramework(configuration);
-		System.out.println("F06 OSGi Platform Implementation - Licensed under Apache 2.0");
 
 		framework.start();
 
@@ -112,6 +115,16 @@ public class Launcher {
 			System.out.println("Oooops.");
 			System.exit(2);
 		}
+	}
+	
+	private void printLicense() throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResource("license").openStream()));
+		String line;
+		while ((line = reader.readLine()) != null) {
+			System.out.println(line);
+		}
+		System.out.println();
+		System.out.flush();		
 	}
 	
 	private void launch0(BundleContext context, Object additionalbundles) throws Exception {

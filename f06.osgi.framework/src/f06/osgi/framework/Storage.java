@@ -287,8 +287,7 @@ class Storage {
 			rootCache.mkdirs();
 		}
 
-		Version version = Version.parseVersion((String) bundle.getHeaders()
-				.get(Constants.BUNDLE_VERSION));
+		Version version = bundle.getVersion();
 		File cache = new File(rootCache, version.toString());
 
 		cache.mkdirs();
@@ -736,8 +735,7 @@ class Storage {
 
 			BundleInfo currentInfo = getBundleInfo(bundle);
 
-			Dictionary currentHeaders = bundle.getHeaders();
-			Version currentVersion = Version.parseVersion((String) currentHeaders.get(Constants.BUNDLE_VERSION));
+			Version currentVersion = bundle.getVersion();
 			try {
 				byte[] byteArray = IOUtil.getBytes(is);
 				is.close();
