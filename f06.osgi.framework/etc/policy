@@ -1,0 +1,7 @@
+(org.osgi.framework.PackagePermission "*" "*")
+(java.lang.RuntimePermission "*" "*")
+(org.osgi.framework.AdminPermission "*" "*")
+(org.osgi.framework.ServicePermission "*" "get")
+(org.osgi.framework.ServicePermission "*" "register")
+(java.util.PropertyPermission "*" "read")
+(java.io.FilePermission "<<ALL FILES>>" "read")
