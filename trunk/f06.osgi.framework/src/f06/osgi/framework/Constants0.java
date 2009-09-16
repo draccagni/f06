@@ -1,0 +1,43 @@
+/*
+ * Copyright (c) Davide Raccagni (2006, 2009). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package f06.osgi.framework;
+
+
+
+public interface Constants0 {
+	
+	final static String LISTENERCLASS                           = "listenerClass";
+	final static String BUNDLE_COMPANY_ATTRIBUTE                = "company";
+	final static String DIRECTIVE                               = ":=";
+	final static String WILDCARD                                = "*";
+
+	final static String BUNDLE_ID                               = "bundleId";
+	
+	final static int    BUNDLE_STARTED_WITH_EAGER_ACTIVATION    = 0x00000000;
+	final static int    BUNDLE_STARTED_WITH_DECLARED_ACTIVATION = 0x00000002;
+	final static int    BUNDLE_STOPPED                          = 0xFFFFFFFF;
+	
+	final static String BUNDLE_FILE_NAME                        = "file";
+
+	final static String SYSTEM_BUNDLE_SYMBOLICNAME              = "system.bundle";
+	final static String SYSTEM_BUNDLE_NAME                      = "F06 OSGi Platform Implementation R4.2";
+	final static String SYSTEM_BUNDLE_VERSION                   = "0.9.2";
+	final static String SYSTEM_BUNDLE_DOCURL                    = "http://www.davideraccagni.com";
+	final static String SYSTEM_BUNDLE_VENDOR                    = "Davide Raccagni";
+	final static String SYSTEM_BUNDLE_COPYRIGHT                 = "(c) 2006-2009 Davide Raccagni";
+
+	final static String FRAMEWORK_VENDOR                        = "f06.osgi.framework";
+}

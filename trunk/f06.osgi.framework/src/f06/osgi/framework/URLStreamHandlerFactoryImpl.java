@@ -1,0 +1,48 @@
+/*
+ * Copyright (c) Davide Raccagni (2006, 2008). All Rights Reserved.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package f06.osgi.framework;
+
+import java.net.URLStreamHandler;
+import java.net.URLStreamHandlerFactory;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.service.url.URLStreamHandlerService;
+
+class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
+
+	public static URLStreamHandlerFactoryImpl instance = new URLStreamHandlerFactoryImpl();
+	
+	private URLStreamHandlerServiceTracker tracker;
+
+	private URLStreamHandlerFactoryImpl() {
+	}
+
+	public void setContext(BundleContext context) {
+		tracker = new URLStreamHandlerServiceTracker(context);
+	}
+	
+	public URLStreamHandler createURLStreamHandler(String protocol) {
+		tracker.open();
+		
+		URLStreamHandlerService service = tracker.getURLStreamHandlerService(protocol);
+
+		if (service != null) {
+			return new URLStreamHandlerProxy(service);
+		}
+
+		return null;
+	}
+}
