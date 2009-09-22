@@ -42,7 +42,7 @@ public class Launcher {
 	
 	public void launch(String args[]) throws Exception {
 		
-		String fc_path = System.getProperty("framework.config", "etc/framework.config");
+		String fc_path = "etc/framework";
 
 		printLicense();
 
@@ -52,7 +52,7 @@ public class Launcher {
 		framework.start();
 
 		BundleContext context = framework.getBundleContext();
-		autoStart(context);
+		launch0(context);
 		
 		FrameworkEvent e = framework.waitForStop(0L);
 		switch (e.getType()) {
@@ -116,7 +116,7 @@ public class Launcher {
 		System.out.flush();		
 	}
 	
-	private void autoStart(BundleContext context) throws Exception {
+	private void launch0(BundleContext context) throws Exception {
 		File[] files = new File("opt").listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
 				return pathname.getName().endsWith(".jar");

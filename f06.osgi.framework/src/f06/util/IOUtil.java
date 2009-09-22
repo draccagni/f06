@@ -127,6 +127,8 @@ public class IOUtil {
 			writer.write(key);
 			writer.write(": ");
 			writer.write((String) headers.get(key));
+			writer.write("\n");
 		}
+		writer.flush();
 	}
 }

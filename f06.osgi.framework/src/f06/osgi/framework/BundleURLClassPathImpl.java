@@ -155,7 +155,7 @@ class BundleURLClassPathImpl implements BundleURLClassPath {
 			
 			String classPath = classPaths[i];
 			if (classPath.equals(".") || classPath.endsWith("/")) {
-				file = new File(cacheDir, Constants0.BUNDLE_FILE_NAME);
+				file = new File(cacheDir, Constants0.BUNDLE_FILE);
 			} else {
 				file = new File(cacheDir, classPath);
 			}
