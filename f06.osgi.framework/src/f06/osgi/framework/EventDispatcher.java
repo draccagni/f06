@@ -15,55 +15,76 @@
  */
 package f06.osgi.framework;
 
-import java.awt.EventQueue;
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
-import f06.util.ThreadPoolExecutor;
+import f06.util.SerialExecutorService;
 
 /*
  * Reactor Design Pattern
  */
 
 class EventDispatcher {
-		
+	
 	private BundleContext context;
 
-	private ThreadPoolExecutor executor;
+	protected SerialExecutorService asyncExecutor;
 
+	protected SerialExecutorService syncExecutor;
+
+	protected volatile boolean shutting_down;
+
+	
 	public EventDispatcher(BundleContext context) {
 		this.context = context;
-		
-		executor = new ThreadPoolExecutor(getClass().getName(), 7); // must be > 1 : deadlock due to shutdown procedure
+
+		syncExecutor = new SerialExecutorService("");
+
+		asyncExecutor = new SerialExecutorService("");
 	}
 	
-	public void syncDispatchEvent(Event event) {
-		dispatchEvent(event);
+	public void syncDispatchEvent(final Event event) {
+		if (shutting_down) {
+			return;
+		}
+
+		syncExecutor.submit(new Runnable() {
+			public void run() {
+				dispatchEvent(event);
+			}
+		}).get();
     }
 	
-	public synchronized void asyncDispatchEvent(final Event event) {
-		executor.execute(new Runnable() {
+	public void asyncDispatchEvent(final Event event) {
+		if (shutting_down) {
+			return;
+		}
+
+//		Thread.dumpStack();
+		asyncExecutor.execute(new Runnable() {
 			public void run() {
+//				System.err.println(event);
 				dispatchEvent(event);
 			}
 		});
 	}
 	
-	public void shutdown() throws InterruptedException {
-		executor.shutdown();
+	public void shutdown() {
+		shutting_down = true;
+
+		syncExecutor.shutdown();
+
+		asyncExecutor.shutdown();
 	}
 	
 	private void dispatchEvent(Event event) {
 		Framework framework = (Framework) context.getBundle();
-		Collection serviceReferences = framework.getServiceReferences(event);
-		Iterator it = serviceReferences.iterator();
-		while (it.hasNext()) {
-			ServiceReference reference = (ServiceReference) it.next();
+		ServiceReference[] references = framework.getServiceReferences(event);
+		if (references != null)
+		for (int i = 0; i < references.length; i++) {
+			ServiceReference reference = references[i];
 			EventHandler eventHandler = (EventHandler) context.getService(reference);
 			if (eventHandler != null) {
 				/*

@@ -37,6 +37,9 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
 import org.osgi.service.packageadmin.RequiredBundle;
 
+import f06.util.ManifestEntry;
+import f06.util.TextUtil;
+
 
 /*
  * 3.2  A bundle is deployed as a Java ARchive (JAR) file. JAR files are used to store
@@ -52,7 +55,7 @@ class HostBundle extends AbstractBundle {
 	
 	protected BundleClassLoader classLoader;
 	
-	protected volatile boolean activating;
+	protected volatile boolean activationTriggered;
 
 	public HostBundle(Framework framework) {
 		super(framework);
@@ -316,11 +319,11 @@ class HostBundle extends AbstractBundle {
 	}
 	
 	void activate() throws BundleException {
-		if (isActivating()) {
+		if (isActivationTriggered()) {
 			return;
 		}
 		
-		setActivating(true);
+		setActivationTriggered(true);
 		
 		/*
 	     * 4.3.5  If the bundle is resolved, the bundle must be activated by calling its Bundle
@@ -365,7 +368,7 @@ class HostBundle extends AbstractBundle {
 						
 						activator.start(getBundleContext());
 						
-						setActivating(false);
+						setActivationTriggered(false);
 
 						return null;
 					}
@@ -864,11 +867,56 @@ class HostBundle extends AbstractBundle {
 		this.classLoader = classLoader;
 	}
 	
-	protected boolean isActivating() {
-		return activating;
+	protected boolean isActivationTriggered() {
+		return activationTriggered;
 	}
-	
-	protected void setActivating(boolean activating) {
-		this.activating = activating;
+
+	boolean isActivationTriggered(String pkgName) {
+    	boolean matched = true;
+
+    	String activationPolicy = (String) getHeaders().get(Constants.BUNDLE_ACTIVATIONPOLICY);
+    	
+    	if (activationPolicy != null) {
+			try {
+				ManifestEntry entry = ManifestEntry.parseEntry(activationPolicy)[0];
+				
+				if (entry.hasAttribute(Constants.EXCLUDE_DIRECTIVE)) {
+					String[] exclude = entry.getAttributeValue(Constants.EXCLUDE_DIRECTIVE).split("\\,");
+					for (int i = 0; i < exclude.length; i++) {
+						String path = exclude[i];
+						if (TextUtil.wildcardCompare(path, pkgName) == 0) {
+							matched = false;
+							
+							break;
+						}
+					}
+				}
+				
+				if (matched) {
+					String[] include;
+					if (entry.hasAttribute(Constants.INCLUDE_DIRECTIVE)) {
+						include = entry.getAttributeValue(Constants.INCLUDE_DIRECTIVE).split("\\,");
+						for (int i = 0; i < include.length; i++) {
+							String path = include[i];
+							if (TextUtil.wildcardCompare(path, pkgName) != 0) {
+								matched = false;
+								
+								break;
+							}
+						}
+					}
+				}
+			} catch (Exception e) {
+				framework.log(LogService.LOG_ERROR, e.getMessage(), e);
+				
+				matched = false;
+			}
+    	}
+		
+		return matched;
+	}
+
+	protected void setActivationTriggered(boolean activationTriggered) {
+		this.activationTriggered = activationTriggered;
 	}
 }

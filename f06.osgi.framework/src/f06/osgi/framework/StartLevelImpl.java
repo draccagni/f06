@@ -26,14 +26,14 @@ import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-import f06.util.ThreadExecutor;
+import f06.util.SerialExecutorService;
 
 
 public class StartLevelImpl implements StartLevel {
 
 	private Framework framework;
 	
-	private ThreadExecutor executor;
+	private SerialExecutorService executor;
 
 	private int activeStartLevel;
 
@@ -49,7 +49,7 @@ public class StartLevelImpl implements StartLevel {
 		
 		initialBundleStartLevel = str != null ? Integer.parseInt(str) : 1;
 		
-		executor = new ThreadExecutor(getClass().getName());
+		executor = new SerialExecutorService(getClass().getName());
 	}
 	
 	public boolean isBundleActivationPolicyUsed(Bundle bundle) {
@@ -101,7 +101,13 @@ public class StartLevelImpl implements StartLevel {
 			 */ 
 			throw new IllegalArgumentException("System bundle start level cannot be changed.");
 		} 
-		
+
+		try {
+			framework.setBundleStartLevel(bundle, startlevel);
+		} catch (IOException e) {
+			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
+		}
+
 		int activeStartLevel = framework.getStartLevel();
 		
 		/*
@@ -140,11 +146,6 @@ public class StartLevelImpl implements StartLevel {
 			}
 		}
 		
-		try {
-			framework.setBundleStartLevel(bundle, startlevel);
-		} catch (IOException e) {
-			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
-		}
 	}
 
 	public void setInitialBundleStartLevel(int startlevel) {

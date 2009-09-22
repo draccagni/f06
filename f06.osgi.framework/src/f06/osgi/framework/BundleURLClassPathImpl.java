@@ -138,6 +138,7 @@ class BundleURLClassPathImpl implements BundleURLClassPath {
 
 	private Map jarFilesByClassPath;
 	
+	// XXX really necessary?
 	private Map entries;
 	
 	public BundleURLClassPathImpl(Bundle bundle, Version version, String[] classPaths, File cacheDir) throws IOException {
