@@ -30,7 +30,7 @@ public interface Constants0 {
 	final static int    BUNDLE_STARTED_WITH_DECLARED_ACTIVATION = 0x00000002;
 	final static int    BUNDLE_STOPPED                          = 0xFFFFFFFF;
 	
-	final static String BUNDLE_FILE_NAME                        = "file";
+	final static String BUNDLE_FILE                        		= "bundle";
 
 	final static String SYSTEM_BUNDLE_SYMBOLICNAME              = "system.bundle";
 	final static String SYSTEM_BUNDLE_NAME                      = "F06 R4.2";

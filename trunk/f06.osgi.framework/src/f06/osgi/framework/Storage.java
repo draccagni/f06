@@ -61,6 +61,11 @@ import f06.util.ManifestEntry;
  */
 
 class Storage {
+	
+	private final static String BUNDLE_VERSION_FOLDER = "c";
+	private final static String BUNDLE_DATA_FOLDER = "data";
+	private final static String BUNDLE_INFO_FILE = "info";
+	private final static String BUNDLE_MANIFEST_FILE = "manifest.mf";
 
 	static class BundleInfo implements Serializable {
 
@@ -282,7 +287,7 @@ class Storage {
 	}
 
 	private File getCache(Bundle bundle) {
-		File rootCache = new File(getBundleFolder(bundle.getBundleId()), "cache");
+		File rootCache = new File(getBundleFolder(bundle.getBundleId()), "ver");
 		if (!rootCache.exists()) {
 			rootCache.mkdirs();
 		}
@@ -296,7 +301,7 @@ class Storage {
 	}
 
 	private File createNewCache(long bundleId, Version version) {
-		File rootCache = new File(getBundleFolder(bundleId), "cache");
+		File rootCache = new File(getBundleFolder(bundleId), BUNDLE_VERSION_FOLDER);
 		if (!rootCache.exists()) {
 			rootCache.mkdirs();
 		}
@@ -311,7 +316,7 @@ class Storage {
 	public synchronized File getDataFile(Bundle bundle, String fileName) {
 		File data = (File) dataFoldersByBundle.get(bundle);
 		if (data == null) {
-			data = new File(getBundleFolder(bundle.getBundleId()), "data");
+			data = new File(getBundleFolder(bundle.getBundleId()), BUNDLE_DATA_FOLDER);
 			dataFoldersByBundle.put(bundle, data);
 
 			data.mkdirs();
@@ -409,14 +414,14 @@ class Storage {
 					ManifestEntry entry = entries[i];
 					String libPath = entry.getName();
 
-					String url = new StringBuilder("jar:").append(
-							bundleFile.toURI().toURL().toString()).append("!/")
-							.append(libPath).toString();
+					String url = new StringBuilder("jar:")
+						.append(bundleFile.toURI().toURL().toString())
+						.append("!/")
+						.append(libPath).toString();
 
 					File file = new File(cache, libPath);
 					file.getParentFile().mkdirs();
 					OutputStream os = new FileOutputStream(file);
-
 					InputStream is = new URL(url).openStream();
 
 					IOUtil.copy(is, os);
@@ -472,8 +477,10 @@ class Storage {
 
 				File cache = createNewCache(bundleId, version);
 
-				File manifestFile = new File(cache, "mf");
-				IOUtil.storeManifest(headers, new FileOutputStream(manifestFile));
+				File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
+				OutputStream os = new FileOutputStream(manifestFile);
+				IOUtil.storeManifest(headers, os);
+				os.close();
 
 				/*
 				 * check if it is an boot class path extension bundle, in that
@@ -508,21 +515,18 @@ class Storage {
 					 */
 
 					if (entries[0].hasAttribute("extension")) {
-						String extension = entries[0]
-								.getAttributeValue("extension");
+						String extension = entries[0].getAttributeValue("extension");
 						if (extension.equals("bootclasspath")) {
 							String symbolicName = entries[0].getName();
 
-							if (!symbolicName.equals(framework
-									.getSymbolicName())
-									&& !symbolicName
-											.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME)) {
+							if (
+									!symbolicName.equals(framework.getSymbolicName()) &&
+									!symbolicName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME)) {
 								throw new BundleException(
 										new StringBuilder(
-												"Trying to install a fragment Bundle{location=")
+												"Trying to install a fragment Bundle(location=")
 												.append(location)
-												.append(
-														"} with extension 'bootclasspath' but host is not System Bundle.")
+												.append(") with extension 'bootclasspath' but host is not System Bundle.")
 												.toString(),
 										new UnsupportedOperationException());
 							}
@@ -540,18 +544,17 @@ class Storage {
 				 * at any time. The purpose of this volatility is testing and
 				 * possible extension of the execution environments at run-time.
 				 */
-				String requiredEE = (String) headers
-						.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
+				String requiredEE = (String) headers.get(Constants.BUNDLE_REQUIREDEXECUTIONENVIRONMENT);
 				if (requiredEE != null) {
 					BundleContext context = framework.getBundleContext();
-					String ee = context
-							.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
+					String ee = context.getProperty(Constants.FRAMEWORK_EXECUTIONENVIRONMENT);
 
 					if (!ee.contains(requiredEE)) {
-						throw new BundleException(new StringBuilder(
-								"Bundle(location=").append(location).append(
-								")  requires an unsopperted execution environment (="
-										+ requiredEE + ").").toString());
+						throw new BundleException(new StringBuilder("Bundle(location=")
+							.append(location)
+							.append(")  requires an unsopperted execution environment (=")
+							.append(requiredEE)
+							.append(").").toString());
 					}
 				}
 
@@ -568,17 +571,15 @@ class Storage {
 				/*
 				 * Create BundleInfo instance
 				 */
-				File bundleFile = new File(cache, Constants0.BUNDLE_FILE_NAME);
+				File bundleFile = new File(cache, Constants0.BUNDLE_FILE);
 				IOUtil.store(bundleFile, byteArray);
 
 				long lastModified = bundleFile.lastModified();
-
 				BundleInfo info = new BundleInfo(bundleId, location, lastModified, framework.getInitialBundleStartLevel());
 				info.setHeaders(headers);
-
 				info.setCache(cache);
-
 				storeBundleInfo(info);
+				
 				bundleInfosByBundle.put(bundle, info);
 
 				/*
@@ -753,7 +754,12 @@ class Storage {
 					long newBundleId = bundle.getBundleId();
 					newCache = createNewCache(newBundleId, newVersion);
 
-					File bundleFile = new File(newCache, Constants0.BUNDLE_FILE_NAME);
+					File bundleFile = new File(newCache, Constants0.BUNDLE_FILE);
+
+					File manifestFile = new File(newCache, "manifest.mf");
+					OutputStream os = new FileOutputStream(manifestFile);
+					IOUtil.storeManifest(newHeaders, os);
+					os.close();
 
 					IOUtil.store(bundleFile, byteArray);
 
@@ -875,7 +881,7 @@ class Storage {
 
 	private Bundle fetchBundle(File bundleFolder) {
 		try {
-			File[] caches = new File(bundleFolder, "cache").listFiles();
+			File[] caches = new File(bundleFolder, "c").listFiles();
 			Arrays.sort(caches, new Comparator() {
 				public int compare(Object arg0, Object arg1) {
 					return - Version.parseVersion(((File) arg0).getName()).compareTo(Version.parseVersion(((File) arg1).getName()));
@@ -885,7 +891,7 @@ class Storage {
 
 			BundleInfo info = null;
 
-			File bundleInfoFile = new File(bundleFolder, "info");
+			File bundleInfoFile = new File(bundleFolder, BUNDLE_INFO_FILE);
 
 			info = fetchBundleInfo(bundleInfoFile);
 
@@ -902,9 +908,9 @@ class Storage {
 			File cache = caches[0];
 			info.setCache(cache);
 			
-			File bundleFile = new File(cache, Constants0.BUNDLE_FILE_NAME);
+			File bundleFile = new File(cache, Constants0.BUNDLE_FILE);
 
-			File manifestFile = new File(cache, "mf");
+			File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
 			Manifest manifest = new Manifest();
 			
 			manifest.read(new FileInputStream(manifestFile));
@@ -983,7 +989,7 @@ class Storage {
 
 	private void storeBundleInfo(BundleInfo info) throws IOException {
 		synchronized (bundleInfosLock) {
-			File file = new File(getBundleFolder(info.getBundleId()), "info");
+			File file = new File(getBundleFolder(info.getBundleId()), BUNDLE_INFO_FILE);
 			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
 
 			ObjectOutputStream oos = new ObjectOutputStream(os);
@@ -1039,8 +1045,7 @@ class Storage {
 						defaultPermissions =  fetchPermissions(permissionFile);
 					}
 				} catch (IOException e) {
-					framework.log(LogService.LOG_ERROR, e.getMessage(),
-							e);
+					framework.log(LogService.LOG_ERROR, e.getMessage(),	e);
 				}
 			}
 			return defaultPermissions;
