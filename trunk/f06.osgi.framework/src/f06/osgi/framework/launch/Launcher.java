@@ -16,12 +16,16 @@
 package f06.osgi.framework.launch;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.osgi.framework.Bundle;
@@ -32,24 +36,13 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
-import f06.util.ManifestEntry;
+import com.sun.org.apache.bcel.internal.generic.GETSTATIC;
 
 public class Launcher {
 	
 	public void launch(String args[]) throws Exception {
 		
-		String fc_path = "etc/framework.config";
-
-		String lc_path = "etc/launcher.config";
-
-		for (int i = 0; i < args.length; i++) {
-			String arg = args[i];
-			if (arg.equals("--framework-config")) {
-				fc_path = args[++i];
-			} else if (arg.equals("--launcher-config")) {
-				fc_path = args[++i];
-			}
-		}
+		String fc_path = System.getProperty("framework.config", "etc/framework.config");
 
 		printLicense();
 
@@ -59,11 +52,7 @@ public class Launcher {
 		framework.start();
 
 		BundleContext context = framework.getBundleContext();
-		Properties lconf = loadConfiguration(lc_path);		
-		Object bundles = lconf.get("org.osgi.framework.launch.additionalbundles");
-		if (bundles != null) {
-			launch0(context, bundles);
-		}
+		autoStart(context);
 		
 		FrameworkEvent e = framework.waitForStop(0L);
 		switch (e.getType()) {
@@ -127,21 +116,28 @@ public class Launcher {
 		System.out.flush();		
 	}
 	
-	private void launch0(BundleContext context, Object additionalbundles) throws Exception {
-		if (additionalbundles != null) {
-			ServiceReference packageAdminReference = context.getServiceReference(PackageAdmin.class.getName());
-			PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminReference);
+	private void autoStart(BundleContext context) throws Exception {
+		File[] files = new File("opt").listFiles(new FileFilter() {
+			public boolean accept(File pathname) {
+				return pathname.getName().endsWith(".jar");
+			}
+		});
+		
+		if (files == null) {
+			return;
+		}
+		
+		ServiceReference packageAdminReference = context.getServiceReference(PackageAdmin.class.getName());
+		PackageAdmin packageAdmin = (PackageAdmin) context.getService(packageAdminReference);
 
-			ServiceReference startLevelReference = context.getServiceReference(StartLevel.class.getName());
-			StartLevel startLevel = (StartLevel) context.getService(startLevelReference);
-
-			Bundle[] bundles = context.getBundles();
-			
-			ManifestEntry[] entries = ManifestEntry.parseEntry(additionalbundles);
-			NEXT_BUNDLE: for (int i = 1; i < entries.length; i++) {
-				ManifestEntry entry = entries[i];
-				String location = entry.getName();
+		ServiceReference startLevelReference = context.getServiceReference(StartLevel.class.getName());
+		StartLevel startLevel = (StartLevel) context.getService(startLevelReference);
+		
+		NEXT_BUNDLE: for (int i = 0; i < files.length; i++) {
+			try {
+				Bundle[] bundles = context.getBundles();
 				
+				String location = files[i].toURI().toURL().toString();
 				for (int j = 0; j < bundles.length; j++) {
 					if (bundles[j].getLocation().equals(location)) {
 						bundles[j].update();
@@ -149,27 +145,51 @@ public class Launcher {
 						continue NEXT_BUNDLE;
 					}
 				}
-			
-				try {
-					Bundle bundle = context.installBundle(location);
-					
-					String startlevel = entry.getAttributeValue("startlevel");
-					if (startlevel != null) {
-						startLevel.setBundleStartLevel(bundle, Integer.parseInt(startlevel));
+
+				context.installBundle(location);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+		
+			try {
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		Bundle[] bundles = context.getBundles();
+
+		int resolved = 0;
+		
+		int prevResolved = 0;
+		
+		int startlevel = 2;
+		
+		while (resolved < bundles.length) {
+			for (int i = 1; i < bundles.length; i++) {
+				Bundle bundle = bundles[i];
+				if (bundle.getState() == Bundle.INSTALLED) {
+					if (packageAdmin.resolveBundles(new Bundle[] {
+							bundles[i]
+					})) {
+						resolved++;
+						startLevel.setBundleStartLevel(bundle, startlevel);
 					}
-					
-					if (packageAdmin.getBundleType(bundle) != PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
-						bundle.start();
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
 				}
 			}
 			
-			context.ungetService(packageAdminReference);
-
-			context.ungetService(startLevelReference);
+			if (resolved == prevResolved) {
+				break;
+			}
+			
+			prevResolved = resolved;
+			startlevel++;
 		}
+		
+
+		context.ungetService(packageAdminReference);
+
+		context.ungetService(startLevelReference);
 	}
 	
 	private Properties loadConfiguration(String c_path) throws IOException {

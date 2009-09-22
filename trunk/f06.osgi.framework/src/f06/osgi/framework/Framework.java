@@ -451,11 +451,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		/*
 		 * 4.7.2  3. Event handling is disabled.
 		 */
-		try {
-			this.eventDispatcher.shutdown();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		this.eventDispatcher.shutdown();
 		
 		setState(Bundle.RESOLVED);
 		
@@ -1230,7 +1226,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 	}
 	
 	
-	Collection getServiceReferences(Event event) {
+	ServiceReference[] getServiceReferences(Event event) {
 		return serviceRegistry.getServiceReferences(event);
 	}
 
@@ -1244,14 +1240,13 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		
 		List eventHooks = serviceRegistry.getEventHooks();
         if (!eventHooks.isEmpty()) {
-        	Collection references = getServiceReferences(event);
-        	Iterator it = references.iterator();
+        	ServiceReference[] references = getServiceReferences(event);
         	Collection contexts = new ArrayList();
-        	while (it.hasNext()) {
-        		ServiceReference reference = (ServiceReference) it.next();
-        		contexts.add(reference.getBundle().getBundleContext());
+        	for (int i = 0; i < references.length; i++) {
+        		contexts.add(references[i].getBundle().getBundleContext());
         	}
-            for (int i = 0; i < eventHooks.size(); i++) {
+
+        	for (int i = 0; i < eventHooks.size(); i++) {
                 ((EventHook) eventHooks.get(i)).event(serviceEvent, contexts);
             }
         }

@@ -43,7 +43,7 @@ import org.osgi.service.packageadmin.RequiredBundle;
 import f06.util.ArrayUtil;
 import f06.util.ManifestEntry;
 import f06.util.TextUtil;
-import f06.util.ThreadExecutor;
+import f06.util.SerialExecutorService;
 
 /*
  * 7.1.3  PackageAdmin (...) provides access to the internal structures of the Framework
@@ -76,7 +76,7 @@ class PackageAdminImpl implements PackageAdmin {
 	
 	private Object changedBundlesLock;
 	
-	private ThreadExecutor executor;
+	private SerialExecutorService executor;
 
 	private Map exportedPackagesByName;
 
@@ -92,7 +92,7 @@ class PackageAdminImpl implements PackageAdmin {
 		
 		this.changedBundlesLock = new Object();
 		
-		this.executor = new ThreadExecutor(new StringBuilder(getClass().getName()).append(" refreshPackages").toString());
+		this.executor = new SerialExecutorService(new StringBuilder(getClass().getName()).append(" refreshPackages").toString());
 		
 		this.exportedPackagesByName = new TreeMap(new Comparator() {
 			public int compare(Object o1, Object o2) {

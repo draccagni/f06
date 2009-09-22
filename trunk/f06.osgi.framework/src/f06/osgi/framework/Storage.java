@@ -444,8 +444,7 @@ class Storage {
 			SecurityManager securityManager = System.getSecurityManager();
 			if (securityManager != null) {
 				securityManager.checkPermission(new AdminPermission(
-						new StringBuilder("(location=").append(location)
-								.append(")").toString(),
+						new StringBuilder("(location=").append(location).append(")").toString(),
 						org.osgi.framework.AdminPermission.EXTENSIONLIFECYCLE));
 			}
 
@@ -467,8 +466,14 @@ class Storage {
 				 * MANIFEST.MF as the first entry
 				 */
 				Manifest manifest = IOUtil.getJarManifest(new ByteArrayInputStream(byteArray));
-
 				Dictionary headers = IOUtil.toDictionary(manifest);
+
+				Version version = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
+
+				File cache = createNewCache(bundleId, version);
+
+				File manifestFile = new File(cache, "mf");
+				IOUtil.storeManifest(headers, new FileOutputStream(manifestFile));
 
 				/*
 				 * check if it is an boot class path extension bundle, in that
@@ -563,10 +568,6 @@ class Storage {
 				/*
 				 * Create BundleInfo instance
 				 */
-				Version version = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
-
-				File cache = createNewCache(bundleId, version);
-
 				File bundleFile = new File(cache, Constants0.BUNDLE_FILE_NAME);
 				IOUtil.store(bundleFile, byteArray);
 
@@ -903,7 +904,11 @@ class Storage {
 			
 			File bundleFile = new File(cache, Constants0.BUNDLE_FILE_NAME);
 
-			Manifest manifest = IOUtil.getJarManifest(new FileInputStream(bundleFile));
+			File manifestFile = new File(cache, "mf");
+			Manifest manifest = new Manifest();
+			
+			manifest.read(new FileInputStream(manifestFile));
+
 			Dictionary headers = IOUtil.toDictionary(manifest);
 			info.setHeaders(headers);
 

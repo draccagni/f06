@@ -196,12 +196,16 @@ class ServiceRegistry {
 		
 		ServiceReference[] allReferences = getAllServiceReferences(clazz, filter);
 		if (allReferences != null) {
-			for (int i = 0; i < allReferences.length; i++) {
-	            ServiceReference reference = allReferences[i];
-				if (reference.isAssignableTo(bundle, clazz)) {
-					references = (ServiceReference[]) ArrayUtil.add(references, reference);
-					break;
+			if (clazz != null) {
+				for (int i = 0; i < allReferences.length; i++) {
+		            ServiceReference reference = allReferences[i];
+					if (reference.isAssignableTo(bundle, clazz)) {
+						references = (ServiceReference[]) ArrayUtil.add(references, reference);
+						break;
+					}
 				}
+			} else {
+				references = allReferences;
 			}
 
 			if (references.length > 0) {
@@ -483,8 +487,8 @@ class ServiceRegistry {
 		return listenerHooks;
 	}
 
-	Collection getServiceReferences(Event event) {
-		Collection serviceReferences = new ArrayList();
+	ServiceReference[] getServiceReferences(Event event) {
+		Collection references = new ArrayList();
 		try {
 			String eventTopic = event.getTopic();
 			
@@ -498,13 +502,13 @@ class ServiceRegistry {
 			 *   the event happened.
 			 */
 			String filter = new StringBuilder("(").append(EventConstants.EVENT_TOPIC).append("=").append(eventTopic).append(")").toString();
-			ServiceReference[] references = context.getAllServiceReferences(EventHandler.class.getName(), filter);
+			ServiceReference[] references0 = context.getAllServiceReferences(EventHandler.class.getName(), filter);
 			
-			if (references != null) {
-				Arrays.sort(references, referencesComparator);
+			if (references0 != null) {
+				Arrays.sort(references0, referencesComparator);
 
-				NEXT_REFERENCE:	for (int i = 0; i < references.length; i++) {
-					ServiceReference reference = references[i];
+				NEXT_REFERENCE:	for (int i = 0; i < references0.length; i++) {
+					ServiceReference reference = references0[i];
 					/*
 					 *   4.6.2  Ensure, at the time the snapshot is taken, that listeners on the list still belong
 					 *   to active bundles at the time the event is delivered.
@@ -556,7 +560,7 @@ class ServiceRegistry {
 							}
 						}
 						
-						serviceReferences.add(reference);
+						references.add(reference);
 					}
 				}
 			}
@@ -564,6 +568,6 @@ class ServiceRegistry {
 			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
 		}
 		
-		return serviceReferences;
+		return references.isEmpty() ? null : (ServiceReference[]) references.toArray(new ServiceReference[0]);
 	}	
 }

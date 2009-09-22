@@ -16,6 +16,7 @@
 package f06.osgi.framework;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.ProtectionDomain;
 import java.security.SecureClassLoader;
@@ -41,6 +42,7 @@ class BundleClassLoader extends SecureClassLoader {
 	protected Framework framework;
 	protected Bundle host;
 	protected BundleURLClassPath[] classPaths;
+	protected boolean isActivationTriggered;
 	
 	protected final static Enumeration EMPTY_ENUMERATION = new Enumeration() {
 		public boolean hasMoreElements() {
@@ -469,11 +471,25 @@ class BundleClassLoader extends SecureClassLoader {
 	protected Class findClass(String name) throws ClassNotFoundException {
 		try {
 			String pkgName = FrameworkUtil.getClassPackage(name);
-			URL url = findEntry(name.replace('.', '/').concat(".class"));
-			if (url != null) {
-				Package pkg = getPackage(pkgName);
+			
+			if (name == null) {
+				int a = 1;
+			}
+			
+			String entryName = name.replace('.', '/').concat(".class");
+			InputStream is = null;
+			Bundle bundle = null;
+			for (int i = 0; i < classPaths.length; i++) {
+				BundleURLClassPath classPath = classPaths[i];			
+				is = classPath.getEntryAsStream(-1, entryName);
+				if (is != null) {
+					bundle = classPath.getBundle();
+					break;
+				}
+			}
 
-				Bundle bundle = getBundle(url);
+			if (is != null) {
+				Package pkg = getPackage(pkgName);
 
 				URL codesourceURL = new URL(bundle.getLocation());
 
@@ -488,7 +504,7 @@ class BundleClassLoader extends SecureClassLoader {
 					definePackage(pkgName, null, null, null, null, null, null, null);
 				}
 				
-				byte[] b = IOUtil.getBytes(url.openStream());
+				byte[] b = IOUtil.getBytes(is);
 				
 				/*
 				 * Each bundle has its own protection domain.
@@ -510,7 +526,11 @@ class BundleClassLoader extends SecureClassLoader {
 				 */
 				
 				if (
+						framework.isBundleActivationPolicyUsed(this.host) && 
+						
 						this.host.getState() == Bundle.STARTING &&
+						
+						((HostBundle) this.host).isActivationTriggered(pkgName) &&
 						
 						/*
 						 * 4.7.2  During the shutdown, bundles with a lazy policy
@@ -518,48 +538,7 @@ class BundleClassLoader extends SecureClassLoader {
 						 */
 						framework.getState() != Bundle.STOPPING
 						) {
-					Dictionary headers = this.host.getHeaders();
-					
-				    if (framework.isBundleActivationPolicyUsed(this.host)) {
-				    	String activationPolicy = (String) headers.get(Constants.BUNDLE_ACTIVATIONPOLICY);
-				    	
-				    	if (activationPolicy != null) {
-				        	ManifestEntry entry = ManifestEntry.parseEntry(activationPolicy)[0];
-				    		
-							boolean matched = true;
-
-							if (entry.hasAttribute(Constants.EXCLUDE_DIRECTIVE)) {
-								String[] exclude = entry.getAttributeValue(Constants.EXCLUDE_DIRECTIVE).split("\\,");
-								for (int i = 0; i < exclude.length; i++) {
-									String path = exclude[i];
-									if (TextUtil.wildcardCompare(path, name) != 0) {
-										matched = false;
-										
-										break;
-									}
-								}
-							}
-							
-							if (matched) {
-								String[] include;
-								if (entry.hasAttribute(Constants.INCLUDE_DIRECTIVE)) {
-									include = entry.getAttributeValue(Constants.INCLUDE_DIRECTIVE).split("\\,");
-									for (int i = 0; i < include.length; i++) {
-										String path = include[i];
-										if (TextUtil.wildcardCompare(path, name) != 0) {
-											matched = false;
-											
-											break;
-										}
-									}
-								}
-							}
-				    		
-				        	if (matched) {
-				        		((HostBundle)this. host).activate();
-				        	}			    		
-				    	}
-				    }
+	        		((HostBundle)this. host).activate();
 			    }
 
 				return clazz;
