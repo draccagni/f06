@@ -18,20 +18,20 @@ package f06.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ThreadExecutor implements Runnable {
+public class SerialExecutorService implements Runnable {
 
 	protected List queue;
 	
 	protected Thread internalThread;
 	
-	protected Object executionLock;
-	
 	protected volatile boolean shutting_down;
 
-	public ThreadExecutor(String name) {
+	protected volatile boolean terminated;
+	
+	public SerialExecutorService(String name) {
 		queue = new ArrayList();
 		
-		executionLock = new Object();
+		shutting_down = false;
 		
 		internalThread = new Thread(this, name);
 		
@@ -52,48 +52,46 @@ public class ThreadExecutor implements Runnable {
 			queue.notifyAll();
 		}
 	}
+	
+	public Future submit(Runnable command) {
+		Future future = new Future(command);
+		execute(future);
+		
+		return future;
+	}
 
 	public void shutdown() {
 		if (!shutting_down) {
-			shutting_down = true;
-				
-			synchronized (executionLock) {
+			synchronized (queue) {
+				shutting_down = true;
+
 				internalThread.interrupt();
 				
-				try {
-					internalThread.join();
-				} catch (InterruptedException e) {
-					// do nothing
-				}
-
 				internalThread = null;
 			}
 		}
 	}
 
 	final public void run() {
-		while (!shutting_down) {
+		EXIT: while (!shutting_down) {
 			Runnable command = null;
 			synchronized (queue) {
-				// prevent a misalignment between wait/notifyAll
+				// to prevent a misalignment between wait/notifyAll
 				while (queue.isEmpty()) {
 					try {
 						queue.wait();
 					} catch (InterruptedException ex) {
-						return;
+						// the executor has been shutted down
+						break EXIT;
 					}
 				}
 
 				command = (Runnable) queue.remove(0);
-			}
 
-			synchronized (executionLock) {
 				command.run();
 			}
 		}
-	}
-
-	public boolean isShuttingDown() {
-		return shutting_down;
+	
+		terminated = true;
 	}
 }
