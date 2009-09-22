@@ -15,13 +15,16 @@
  */
 package f06.util;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.jar.Attributes;
@@ -115,5 +118,15 @@ public class IOUtil {
 		}
 		
 		return null;
+	}
+	
+	public static void storeManifest(Dictionary headers, OutputStream os) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
+		for (Enumeration e = headers.keys(); e.hasMoreElements(); ) {
+			String key = (String) e.nextElement();
+			writer.write(key);
+			writer.write(": ");
+			writer.write((String) headers.get(key));
+		}
 	}
 }
