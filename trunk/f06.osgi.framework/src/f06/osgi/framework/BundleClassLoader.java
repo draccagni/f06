@@ -68,111 +68,114 @@ class BundleClassLoader extends SecureClassLoader {
 
 	// Waiting for Generics
 	private Object find0(String name, Class tClazz) throws Exception {
-			String pkgName = tClazz == Class.class ? FrameworkUtil.getClassPackage(name) : FrameworkUtil.getResourcePackage(name);
-			
-			/*
-			 * 3.8.4  1. If the class or resource is in a java.* package, the request is
-			 * delegated to the parent class loader; otherwise, the search continues with the next
-			 * step. If the request is delegated to the parent class loader and the class or
-			 * resource is not found, then the search terminates and the request fails.
-			 */
-			if (pkgName.startsWith("java.")) {
-				if (tClazz == Class.class) {
+		String pkgName = tClazz == Class.class ? FrameworkUtil.getClassPackage(name) : FrameworkUtil.getResourcePackage(name);
+		
+		/*
+		 * 3.8.4  1. If the class or resource is in a java.* package, the request is
+		 * delegated to the parent class loader; otherwise, the search continues with the next
+		 * step. If the request is delegated to the parent class loader and the class or
+		 * resource is not found, then the search terminates and the request fails.
+		 */
+		if (pkgName.startsWith("java.")) {
+			if (tClazz == Class.class) {
+				return getParent().loadClass(name);
+			} else if (tClazz == URL.class) {
+				return getParent().getResource(name);
+			} else if (tClazz == Enumeration.class) {
+				return getParent().getResources(name);
+			} 
+		}
+		
+		/*
+		 * 3.8.4  2. If the class or resource is from a package included in the boot delegation
+		 * list (org.osgi.framework.bootdelegation), then the request is delegated
+		 * to the parent class loader. If the class or resource is found there, the
+		 * search ends.
+		 */
+		if (framework.isBootDelegated(pkgName)) {
+			if (tClazz == Class.class) {
+				try {
 					return getParent().loadClass(name);
-				} else if (tClazz == URL.class) {
-					return getParent().getResource(name);
-				} else if (tClazz == Enumeration.class) {
-					return getParent().getResources(name);
-				} 
-			}
-			
-			/*
-			 * 3.8.4  2. If the class or resource is from a package included in the boot delegation
-			 * list (org.osgi.framework.bootdelegation), then the request is delegated
-			 * to the parent class loader. If the class or resource is found there, the
-			 * search ends.
-			 */
-			if (framework.isBootDelegated(pkgName)) {
-				if (tClazz == Class.class) {
-					try {
-						return getParent().loadClass(name);
-					} catch (Exception e) {
-						// do nothing
-					}
-				} else if (tClazz == URL.class) {
-					URL u = getParent().getResource(name);
-					if (u != null) {
-						return u;
-					}
-				} else if (tClazz == Enumeration.class) {
-					Enumeration e = getParent().getResources(name);
-					if (e != null) {
-						return e;
-					}
-				} 
-			}
-	
-			/*
-			 * 3.8.4  3. If the class or resource is in a package that is imported using
-			 * Import-Package or was imported dynamically in a previous load, then the
-			 * request is delegated to the exporting bundle’s class loader; otherwise the
-			 * search continues with the next step. If the request is delegated to an
-			 * OSGi Service Platform Release 4 55-268 Module Layer Version 1.3 Runtime Class Loading
-			 * exporting class loader and the class or resource is not found, then the
-			 * search terminates and the request fails.
-			 */
-			ExportedPackage[] exportedPackages = framework.getExportedPackages(pkgName);
-			if (exportedPackages != null) {
-				for (int i = 0; i < exportedPackages.length; i++) {
-					ExportedPackage exportedPackage = exportedPackages[i];
-					Bundle[] importingBundles = exportedPackage.getImportingBundles(); 
+				} catch (Exception e) {
+					// do nothing
+				}
+			} else if (tClazz == URL.class) {
+				URL u = getParent().getResource(name);
+				if (u != null) {
+					return u;
+				}
+			} else if (tClazz == Enumeration.class) {
+				Enumeration e = getParent().getResources(name);
+				if (e != null) {
+					return e;
+				}
+			} 
+		}
+
+		/*
+		 * 3.8.4  3. If the class or resource is in a package that is imported using
+		 * Import-Package or was imported dynamically in a previous load, then the
+		 * request is delegated to the exporting bundle’s class loader; otherwise the
+		 * search continues with the next step. If the request is delegated to an
+		 * OSGi Service Platform Release 4 55-268 Module Layer Version 1.3 Runtime Class Loading
+		 * exporting class loader and the class or resource is not found, then the
+		 * search terminates and the request fails.
+		 */
+		ExportedPackage[] exportedPackages = framework.getExportedPackages(pkgName);
+		if (exportedPackages != null) {
+			for (int i = 0; i < exportedPackages.length; i++) {
+				ExportedPackage exportedPackage = exportedPackages[i];
+				Bundle[] importingBundles = exportedPackage.getImportingBundles(); 
+				
+				if (importingBundles != null && ArrayUtil.contains(importingBundles, host)) {
+					Bundle exportingBundle = exportedPackage.getExportingBundle();
 					
-					if (importingBundles != null && ArrayUtil.contains(importingBundles, host)) {
-						Bundle exportingBundle = exportedPackage.getExportingBundle();
-						
-						if (!exportingBundle.equals(host)) {							
-							String[] exclude = ((ExportedPackageImpl) exportedPackage).getExclude();
-							for (int j = 0; j < exclude.length; j++) {
-								String filter = new StringBuilder(exportedPackage.getName()).append('.').append(exclude[j]).toString();
-								if (TextUtil.wildcardCompare(filter, name) == 0) {
-									return null;
-								}
+					if (!exportingBundle.equals(host)) {							
+						String[] exclude = ((ExportedPackageImpl) exportedPackage).getExclude();
+						for (int j = 0; j < exclude.length; j++) {
+							String filter = new StringBuilder(exportedPackage.getName()).append('.').append(exclude[j]).toString();
+							if (TextUtil.wildcardCompare(filter, name) == 0) {
+								return null;
 							}
-	
-							String[] include = ((ExportedPackageImpl) exportedPackage).getInclude();
-							for (int j = 0; j < include.length; j++) {
-								String filter = new StringBuilder(exportedPackage.getName()).append('.').append(include[j]).toString();
-								if (TextUtil.wildcardCompare(filter, name) == 0) {
-									/*
-									* 3.8.4  3 If the class or resource is in a package that is imported using Import-
-									* Package or was imported dynamically in a previous load, then the
-									* request is delegated to the exporting bundle’s class loader; otherwise the
-									* search continues with the next step. If the request is delegated to an
-									* exporting class loader and the class or resource is not found, then the
-									* search terminates and the request fails.
-									*/
-									BundleClassLoader classLoader = ((ExportedPackageImpl) exportedPackage).getBundleClassLoader();
-									
-									return classLoader.find1(name, tClazz);
+						}
+
+						String[] include = ((ExportedPackageImpl) exportedPackage).getInclude();
+						for (int j = 0; j < include.length; j++) {
+							String filter = new StringBuilder(exportedPackage.getName()).append('.').append(include[j]).toString();
+							if (TextUtil.wildcardCompare(filter, name) == 0) {
+								/*
+								* 3.8.4  3 If the class or resource is in a package that is imported using Import-
+								* Package or was imported dynamically in a previous load, then the
+								* request is delegated to the exporting bundle’s class loader; otherwise the
+								* search continues with the next step. If the request is delegated to an
+								* exporting class loader and the class or resource is not found, then the
+								* search terminates and the request fails.
+								*/
+								BundleClassLoader classLoader = ((ExportedPackageImpl) exportedPackage).getBundleClassLoader();
+								
+								if (tClazz == Class.class) {
+									return classLoader.findClass(name);
+								} else if (tClazz == URL.class) {
+									URL u = classLoader.findEntry(name);
+
+									return u;
+								} else { // if (tClazz == Enumeration.class) {
+									Enumeration e = classLoader.findEntries(name);
+
+									return e;
 								}
 							}
 						}
 					}
 				}
 			}
+		}
 		
 		return find1(name, tClazz);
 	}
 	
 	// Waiting for Generics
 	Object find1(String name, Class tClazz) throws Exception {
-		if (tClazz == Class.class) {
-	        Class c = findLoadedClass(name);
-	        if (c != null) {
-	        	return c;
-	        }
-		}
-
 		/*
 		 * 3.8.4  4. If the class or resource is in a package that is imported from one or more
 		 * other bundles using Require-Bundle, the request is delegated to the class loaders of the other
@@ -470,7 +473,12 @@ class BundleClassLoader extends SecureClassLoader {
 	
 	protected Class findClass(String name) throws ClassNotFoundException {
 		try {
-			String entryName = name.replace('.', '/').concat(".class");
+	        Class c = findLoadedClass(name);
+	        if (c != null) {
+	        	return c;
+	        }
+
+	        String entryName = name.replace('.', '/').concat(".class");
 			InputStream is = null;
 			Bundle bundle = null;
 			for (int i = 0; i < classPaths.length; i++) {

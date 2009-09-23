@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -1603,7 +1602,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		return storage.getBundleAutostartSetting(bundle);
 	}
 	
-	void setBundleStartLevel(Bundle bundle, int startlevel) throws IOException {
+	void setBundleStartLevel(Bundle bundle, int startlevel) {
 		storage.setBundleStartLevel(bundle, startlevel);
 	}
 	

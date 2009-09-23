@@ -63,11 +63,13 @@ import f06.util.ManifestUtil;
 
 class Storage {
 	
-	private final static String BUNDLE_CONTENT_FOLDER = "content";
+	private final static String BUNDLE_TEMP_FOLDER = "cache";
+	private final static String BUNDLE_CACHE_FOLDER = "cache";
 	private final static String BUNDLE_DATA_FOLDER = "data";
-	private final static String BUNDLE_INFO_FILE = "info";
-	private final static String BUNDLE_PERMISSIONS_FILE = "policy";
-	private final static String BUNDLE_MANIFEST_FILE = "manifest.mf";
+	private final static String BUNDLE_INFO_FILE = "bundleinfo";
+	private final static String BUNDLE_PERMISSIONS_FILE = "bundlepolicy";
+	private final static String BUNDLE_MANIFEST_FILE = "bundlemanifest";
+	final static String BUNDLE_FILE = "bundlefile";
 
 	static class BundleInfo implements Serializable {
 
@@ -78,15 +80,15 @@ class Storage {
 
 		private long bundleId;
 
-		private long lastModified;
+		private volatile long lastModified;
 
 		private String location;
 
-		private int autostartSetting;
+		private volatile int autostartSetting;
 
-		private int startLevel;
+		private volatile int startLevel;
 
-		private boolean removalPending;
+		private volatile boolean removalPending;
 
 		private transient Dictionary headers;
 
@@ -157,17 +159,6 @@ class Storage {
 		public File getCache() {
 			return cache;
 		}
-		
-		public void store(File folder) throws IOException {
-			File file = new File(folder, BUNDLE_INFO_FILE);
-			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
-
-			ObjectOutputStream oos = new ObjectOutputStream(os);
-			oos.writeObject(this);
-			os.flush();
-			os.close();
-
-		}
 	}
 
 	private Bundle[] bundles;
@@ -193,7 +184,6 @@ class Storage {
 	private Object permissionsLock;
 	
     private Map classPathsByBundle;
-	public final static String BUNDLE_FILE                        		= "bundle";
 	
 	
 	private static volatile boolean firstInit = true;
@@ -259,16 +249,14 @@ class Storage {
 					if (files[i].isDirectory()) {
 						Bundle bundle = fetchBundle(files[i]);
 						if (bundle != null) {
-							bundles = (Bundle[]) ArrayUtil
-									.add(this.bundles, bundle);
+							bundles = (Bundle[]) ArrayUtil.add(this.bundles, bundle);
 						}
 					}
 				}
 
 				Arrays.sort(bundles, new Comparator() {
 					public int compare(Object o1, Object o2) {
-						return ((Bundle) o1).getBundleId() > ((Bundle) o1)
-								.getBundleId() ? 1 : -1;
+						return ((Bundle) o1).getBundleId() > ((Bundle) o1).getBundleId() ? 1 : -1;
 					}
 				});
 			}
@@ -315,7 +303,7 @@ class Storage {
 	}
 
 	private File createNewCache(long bundleId, Version version) {
-		File rootCache = new File(getBundleFolder(bundleId), BUNDLE_CONTENT_FOLDER);
+		File rootCache = new File(getBundleFolder(bundleId), BUNDLE_CACHE_FOLDER);
 		if (!rootCache.exists()) {
 			rootCache.mkdirs();
 		}
@@ -325,6 +313,15 @@ class Storage {
 		cache.mkdirs();
 
 		return cache;
+	}
+	
+	public synchronized File getTempFolder() {
+		File temp = new File(BUNDLE_TEMP_FOLDER);
+		if (!temp.exists()) {
+			temp.mkdirs();
+		}
+		
+		return temp;
 	}
 
 	public synchronized File getDataFile(Bundle bundle, String fileName) {
@@ -477,22 +474,28 @@ class Storage {
 					is = url.openStream();
 				}
 
-				byte[] byteArray = IOUtil.getBytes(is);
+				File temp = new File(getTempFolder(), Long.toString(System.currentTimeMillis()));
+
+				OutputStream os;
+				
+				os = new FileOutputStream(temp);
+				IOUtil.copy(is, os);
+				os.close();
+
 				is.close();
 
 				/*
 				 * instead of JarInputStream.getManifest() who aspects
 				 * MANIFEST.MF as the first entry
 				 */
-				Manifest manifest = ManifestUtil.getJarManifest(new ByteArrayInputStream(byteArray));
+				Manifest manifest = ManifestUtil.getJarManifest(new FileInputStream(temp));
 				Dictionary headers = ManifestUtil.toDictionary(manifest);
 
 				Version version = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
-
 				File cache = createNewCache(bundleId, version);
 
 				File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
-				OutputStream os = new FileOutputStream(manifestFile);
+				os = new FileOutputStream(manifestFile);
 				ManifestUtil.storeManifest(headers, os);
 				os.close();
 
@@ -501,7 +504,7 @@ class Storage {
 				 * case install it
 				 */
 
-				if (isBundleInstalled(location)) {
+				if (isBundleInstalled((String) headers.get(Constants.BUNDLE_SYMBOLICNAME))) {
 					throw new BundleException(new StringBuilder(
 							"Bundle(location=").append(location).append(
 							") already installed.").toString());
@@ -582,17 +585,17 @@ class Storage {
 					bundle = new HostBundle(framework);
 				}
 
+				File bundlefile = new File(cache, Storage.BUNDLE_FILE);
+				temp.renameTo(bundlefile);
+
 				/*
 				 * Create BundleInfo instance
 				 */
-				File bundleFile = new File(cache, Storage.BUNDLE_FILE);
-				IOUtil.store(bundleFile, byteArray);
-
-				long lastModified = bundleFile.lastModified();
+				long lastModified = bundlefile.lastModified();
 				BundleInfo info = new BundleInfo(bundleId, location, lastModified, framework.getInitialBundleStartLevel());
 				info.setHeaders(headers);
 				info.setCache(cache);	
-				info.store(getBundleFolder(bundleId));
+				storeBundleInfo(info);
 				
 				bundleInfosByBundle.put(bundle, info);
 
@@ -600,7 +603,7 @@ class Storage {
 				 * Create BundleURLClassPath instance
 				 */
 				BundleURLClassPath classPath = createBundleURLClassPath(bundle, version,
-						bundleFile, cache, false);
+						bundlefile, cache, false);
 				classPathsByBundle.put(
 						bundle,
 						new BundleURLClassPath[] { classPath });
@@ -665,8 +668,15 @@ class Storage {
 		}
 	}
 
-	private boolean isBundleInstalled(String location) {
-		return getBundle(location) != null;
+	private boolean isBundleInstalled(String symbolicName) {
+		Bundle[] bundles = getBundles();
+		for (int i = 0; i < bundles.length; i++) {
+			if (bundles[i].getSymbolicName().equals(symbolicName)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	void setRemovalPending(Bundle bundle) {
@@ -675,7 +685,7 @@ class Storage {
 
 			info.setRemovalPending(true);
 
-			info.store(getBundleFolder(bundle.getBundleId()));
+			storeBundleInfo(info);
 		} catch (IOException e) {
 			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
 		}
@@ -754,14 +764,21 @@ class Storage {
 
 			Version currentVersion = bundle.getVersion();
 			try {
-				byte[] byteArray = IOUtil.getBytes(is);
+				File temp = new File(getTempFolder(), Long.toString(System.currentTimeMillis()));
+
+				OutputStream os;
+				
+				os = new FileOutputStream(temp);
+				IOUtil.copy(is, os);
+				os.close();
+
 				is.close();
 
 				/*
 				 * instead of JarInputStream.getManifest() who aspects
 				 * MANIFEST.MF as the first entry
 				 */
-				Manifest manifest = ManifestUtil.getJarManifest(new ByteArrayInputStream(byteArray));
+				Manifest manifest = ManifestUtil.getJarManifest(new FileInputStream(temp));
 				Dictionary newHeaders = ManifestUtil.toDictionary(manifest);
 				Version newVersion = Version.parseVersion((String) newHeaders.get(Constants.BUNDLE_VERSION));
 
@@ -769,44 +786,36 @@ class Storage {
 					long newBundleId = bundle.getBundleId();
 					newCache = createNewCache(newBundleId, newVersion);
 
-					File bundleFile = new File(newCache, Storage.BUNDLE_FILE);
+					File bundlefile = new File(newCache, BUNDLE_FILE);
 
-					File manifestFile = new File(newCache, "manifest.mf");
-					OutputStream os = new FileOutputStream(manifestFile);
+					File manifestFile = new File(newCache, BUNDLE_MANIFEST_FILE);
+					os = new FileOutputStream(manifestFile);
 					ManifestUtil.storeManifest(newHeaders, os);
 					os.close();
 
-					IOUtil.store(bundleFile, byteArray);
+					temp.renameTo(bundlefile);
 
-					long newLastModified = bundleFile.lastModified();
-					BundleInfo newInfo = new BundleInfo(bundle.getBundleId(),
-							bundle.getLocation(), newLastModified, framework.getInitialBundleStartLevel());
-					BundleURLClassPath newClassPath = createBundleURLClassPath(bundle, newVersion, bundleFile, newCache, false);
+					BundleURLClassPath newClassPath = createBundleURLClassPath(bundle, newVersion, bundlefile, newCache, false);
 					
 					BundleURLClassPath[] classPaths = (BundleURLClassPath[]) classPathsByBundle.get(bundle);
 					classPaths = (BundleURLClassPath[]) ArrayUtil.add(classPaths, newClassPath);
 					
 					classPathsByBundle.put(bundle, classPaths);
 
-
 					/*
 					 * the newer bundle has been succefully installed: update
 					 */
+					long newLastModified = bundlefile.lastModified();
+					BundleInfo newInfo = new BundleInfo(bundle.getBundleId(),
+							bundle.getLocation(), newLastModified, framework.getInitialBundleStartLevel());
 					newInfo.setHeaders(newHeaders);
 					newInfo.setCache(newCache);
-
 					newInfo.setStartLevel(currentInfo.getStartLevel());
-					newInfo.setAutostartSetting(currentInfo
-							.getAutostartSetting());
-
-					newInfo.store(getBundleFolder(bundle.getBundleId()));
+					newInfo.setAutostartSetting(currentInfo.getAutostartSetting());
+					storeBundleInfo(newInfo);
 
 					currentInfo.setRemovalPending(true);
-					try {
-						currentInfo.store(getBundleFolder(bundle.getBundleId()));
-					} catch (IOException e) {
-						throw new BundleException(e.getMessage());
-					}
+					storeBundleInfo(currentInfo);
 					
 					/*
 					 * BundleInfo up-to-date to the last version available
@@ -896,7 +905,11 @@ class Storage {
 
 	private Bundle fetchBundle(File bundleFolder) {
 		try {
-			File[] caches = bundleFolder.listFiles();
+			File[] caches = new File(bundleFolder, BUNDLE_CACHE_FOLDER).listFiles();
+			if (caches == null) {
+				return null;
+			}
+			
 			Arrays.sort(caches, new Comparator() {
 				public int compare(Object arg0, Object arg1) {
 					return - Version.parseVersion(((File) arg0).getName()).compareTo(Version.parseVersion(((File) arg1).getName()));
@@ -912,20 +925,26 @@ class Storage {
 			 * storage and return null.
 			 */
 			if (info == null || info.isRemovalPending()) {
-				IOUtil.delete(bundleFolder);
+				IOUtil.delete(cache);
 
 				return null;
 			}
+			
+			/*
+			 * Remove old versions
+			 */
+			for (int i = 1; i < caches.length; i++) {
+				IOUtil.delete(cache);
+			}
+			
 			info.setCache(cache);
 			
-			File bundleFile = new File(cache, Storage.BUNDLE_FILE);
 
 			File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
 			Manifest manifest = new Manifest();
-			
 			manifest.read(new FileInputStream(manifestFile));
-
 			Dictionary headers = ManifestUtil.toDictionary(manifest);
+
 			info.setHeaders(headers);
 
 			Version lastVersion = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
@@ -946,6 +965,8 @@ class Storage {
 			}
 
 			bundleInfosByBundle.put(bundle, info);
+
+			File bundleFile = new File(cache, BUNDLE_FILE);
 
 			BundleURLClassPath classPath = createBundleURLClassPath(bundle, lastVersion, bundleFile, cache, true);
 			classPathsByBundle.put(
@@ -1011,7 +1032,7 @@ class Storage {
 		info.setAutostartSetting(autostartSetting);
 
 		try {
-			info.store(getBundleFolder(bundle.getBundleId()));
+			storeBundleInfo(info);
 		} catch (IOException e) {
 			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
 		}
@@ -1021,13 +1042,28 @@ class Storage {
 		return getBundleAutostartSetting(bundle) != AbstractBundle.STOPPED;
 	}
 
-	void setBundleStartLevel(Bundle bundle, int startlevel) throws IOException {
+	void setBundleStartLevel(Bundle bundle, int startlevel) {
 		synchronized (bundlesLock) {
 			BundleInfo info = getBundleInfo(bundle);
 			info.setStartLevel(startlevel);
 
-			info.store(getBundleFolder(bundle.getBundleId()));
+			try {
+				storeBundleInfo(info);
+			} catch (IOException e) {
+				framework.log(LogService.LOG_ERROR, e.getMessage(), e);
+			}
 		}
+	}
+	
+	public void storeBundleInfo(BundleInfo info) throws IOException {
+		File file = new File(info.getCache(), BUNDLE_INFO_FILE);
+		OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+
+		ObjectOutputStream oos = new ObjectOutputStream(os);
+		oos.writeObject(info);
+		os.flush();
+		os.close();
+
 	}
 
 	/*
