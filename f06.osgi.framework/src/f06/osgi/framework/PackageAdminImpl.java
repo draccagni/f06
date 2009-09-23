@@ -256,7 +256,7 @@ class PackageAdminImpl implements PackageAdmin {
 			host = bundle;
 		}
 		
-		ManifestEntry[] entries = ManifestEntry.parseEntry(exportPackage);
+		ManifestEntry[] entries = ManifestEntry.parse(exportPackage);
 		if (entries == null)
 			return;
 		
@@ -402,7 +402,7 @@ class PackageAdminImpl implements PackageAdmin {
 			host = bundle;
 		}
 		
-		ManifestEntry[] entries = ManifestEntry.parseEntry(importPackage);
+		ManifestEntry[] entries = ManifestEntry.parse(importPackage);
 		NEXT_ENTRY: for (int i = 0; i < entries.length; i++) {
 			ManifestEntry importPackageEntry = entries[i];
 			String importPkgName = importPackageEntry.getName();
@@ -558,7 +558,7 @@ class PackageAdminImpl implements PackageAdmin {
 					 */
 					String[] uses = ((ExportedPackageImpl) exportedPackage).getUses();
 					if (uses != null) {
-						ManifestEntry[] exportPackageEntries = ManifestEntry.parseEntry(exportingBundle.getHeaders().get(Constants.EXPORT_PACKAGE));
+						ManifestEntry[] exportPackageEntries = ManifestEntry.parse(exportingBundle.getHeaders().get(Constants.EXPORT_PACKAGE));
 						for (int k = 0; k < exportPackageEntries.length; k++) {
 							ManifestEntry exportPackageEntry = exportPackageEntries[k];
 							for (int l = 0; l < uses.length; l++) {
@@ -620,7 +620,7 @@ class PackageAdminImpl implements PackageAdmin {
 			host = bundle;
 		}
 		
-		ManifestEntry[] entries = ManifestEntry.parseEntry(requireBundle);
+		ManifestEntry[] entries = ManifestEntry.parse(requireBundle);
 		NEXT_ENTRY: for (int i = 0; i < entries.length; i++) {
 			ManifestEntry entry = entries[i];
 			String symbolicName = entry.getName();
@@ -731,7 +731,7 @@ class PackageAdminImpl implements PackageAdmin {
 			String importPackage = (String) bundle.getHeaders().get(Constants.IMPORT_PACKAGE);
 			
 			if (importPackage != null) {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(importPackage);
+				ManifestEntry[] entries = ManifestEntry.parse(importPackage);
 				for (int i = 0; i < entries.length; i++) {
 					String importPkgName = entries[i].getName();
 					
@@ -764,7 +764,7 @@ class PackageAdminImpl implements PackageAdmin {
 			String requireBundle = (String) bundle.getHeaders().get(Constants.REQUIRE_BUNDLE);
 
 			if (requireBundle != null) {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(requireBundle);
+				ManifestEntry[] entries = ManifestEntry.parse(requireBundle);
 				for (int i = 0; i < entries.length; i++) {
 					ManifestEntry entry = entries[i];
 					String symbolicName = entry.getName();
@@ -870,7 +870,7 @@ class PackageAdminImpl implements PackageAdmin {
 				
 				String symbolicName = (String) bundle.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME);
 				if (symbolicName != null) {
-					ManifestEntry[] entries = ManifestEntry.parseEntry(symbolicName);
+					ManifestEntry[] entries = ManifestEntry.parse(symbolicName);
 					
 					/*
 					 * 3.5.2  fragment-attachment – Defines how fragments are allowed to be
@@ -982,7 +982,7 @@ class PackageAdminImpl implements PackageAdmin {
 		String importPackage = (String) bundle.getHeaders().get(Constants.IMPORT_PACKAGE);
 
 		if (importPackage != null) {
-			ManifestEntry[] importPackageEntries = ManifestEntry.parseEntry(importPackage);
+			ManifestEntry[] importPackageEntries = ManifestEntry.parse(importPackage);
 			for (int i = 0; i < importPackageEntries.length; i++) {
 				ManifestEntry importPackageEntry = importPackageEntries[i];
 				String importPkgName = importPackageEntry.getName();
@@ -1026,7 +1026,7 @@ class PackageAdminImpl implements PackageAdmin {
 		String requireBundle = (String) bundle.getHeaders().get(Constants.REQUIRE_BUNDLE);
 
 		if (requireBundle != null) {
-			ManifestEntry[] requireBundleEntries = ManifestEntry.parseEntry(requireBundle);
+			ManifestEntry[] requireBundleEntries = ManifestEntry.parse(requireBundle);
 			for (int i = 0; i < requireBundleEntries.length; i++) {
 				ManifestEntry entry = requireBundleEntries[i];
 				String symbolicName = entry.getName();
@@ -1063,7 +1063,7 @@ class PackageAdminImpl implements PackageAdmin {
 		String exportPackage = (String) bundle.getHeaders().get(Constants.EXPORT_PACKAGE);
 		
 		if (exportPackage != null) {
-			ManifestEntry[] entries = ManifestEntry.parseEntry(exportPackage);
+			ManifestEntry[] entries = ManifestEntry.parse(exportPackage);
 			if (entries == null)
 				return;
 			

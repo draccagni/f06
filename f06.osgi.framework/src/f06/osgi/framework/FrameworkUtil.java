@@ -56,7 +56,7 @@ public class FrameworkUtil {
 	}
 	
 	static String getSymbolicName(Dictionary headers) throws Exception {
-		ManifestEntry[] entries = ManifestEntry.parseEntry(headers.get(Constants.BUNDLE_SYMBOLICNAME));
+		ManifestEntry[] entries = ManifestEntry.parse(headers.get(Constants.BUNDLE_SYMBOLICNAME));
 		if (entries != null) {
 			return entries[0].getName();
 		}
@@ -65,7 +65,7 @@ public class FrameworkUtil {
 	}
 	
 	static boolean isSingleton(Bundle bundle) throws Exception {
-		ManifestEntry[] entries = ManifestEntry.parseEntry(bundle.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME));
+		ManifestEntry[] entries = ManifestEntry.parse(bundle.getHeaders().get(Constants.BUNDLE_SYMBOLICNAME));
 		if (entries != null) {
 			if (entries[0].hasAttribute(Constants.SINGLETON_DIRECTIVE)) {
 				return Boolean.parseBoolean(entries[0].getAttributeValue(Constants.SINGLETON_DIRECTIVE));

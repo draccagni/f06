@@ -878,7 +878,7 @@ class HostBundle extends AbstractBundle {
     	
     	if (activationPolicy != null) {
 			try {
-				ManifestEntry entry = ManifestEntry.parseEntry(activationPolicy)[0];
+				ManifestEntry entry = ManifestEntry.parse(activationPolicy)[0];
 				
 				if (entry.hasAttribute(Constants.EXCLUDE_DIRECTIVE)) {
 					String[] exclude = entry.getAttributeValue(Constants.EXCLUDE_DIRECTIVE).split("\\,");

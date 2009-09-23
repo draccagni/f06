@@ -56,17 +56,17 @@ public class ManifestEntry {
 		return name;
 	}
 
-	public static ManifestEntry[] parseEntry(Object entry) throws Exception {
+	public static ManifestEntry[] parse(Object entry) throws Exception {
 		ManifestEntry[] entries = (ManifestEntry[]) parsedEntries.get(entry);
 		if (entries == null) {
-			entries = parseEntry0(entry);
+			entries = parse0(entry);
 			parsedEntries.put(entry, entries);
 		}
 		
 		return entries;
 	}
 
-	private static ManifestEntry[] parseEntry0(Object entry) throws Exception {
+	private static ManifestEntry[] parse0(Object entry) throws Exception {
 		String s = (String) entry;
 		
 		if ((s == null) || (s.length() == 0)) {
@@ -220,6 +220,6 @@ public class ManifestEntry {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		parseEntry("a;b;c=2");
+		parse("a;b;c=2");
 	}
 }
