@@ -354,7 +354,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		String frameworkBootDelegation = context.getProperty(Constants.FRAMEWORK_BOOTDELEGATION);
 		if (frameworkBootDelegation != null) {
 			try {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(frameworkBootDelegation);
+				ManifestEntry[] entries = ManifestEntry.parse(frameworkBootDelegation);
 				for (int i = 0; i < entries.length; i++) {
 					bootDelegatedPackageNames.add(entries[i].getName());
 				}
@@ -671,7 +671,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 			 * Frameworks discretion, which can require a Framework re-launch.
 			 */
 			try {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(bundle.getHeaders().get(Constants.FRAGMENT_HOST));
+				ManifestEntry[] entries = ManifestEntry.parse(bundle.getHeaders().get(Constants.FRAGMENT_HOST));
 				String symbolicName = entries[0].getName();
 				
 				if (
@@ -1461,7 +1461,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 					continue;
 				}
 				
-				ManifestEntry[] entries = ManifestEntry.parseEntry(bundle0.getHeaders().get(Constants.FRAGMENT_HOST));
+				ManifestEntry[] entries = ManifestEntry.parse(bundle0.getHeaders().get(Constants.FRAGMENT_HOST));
 				for (int j = 0; j < entries.length; j++) {
 					ManifestEntry entry = entries[j];
 					
@@ -1518,7 +1518,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 					continue;
 				}
 				
-				ManifestEntry[] entries = ManifestEntry.parseEntry(bundle0.getHeaders().get(Constants.FRAGMENT_HOST));
+				ManifestEntry[] entries = ManifestEntry.parse(bundle0.getHeaders().get(Constants.FRAGMENT_HOST));
 				for (int j = 0; j < entries.length; j++) {
 					ManifestEntry entry = entries[j];
 					

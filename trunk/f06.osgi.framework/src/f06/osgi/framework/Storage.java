@@ -55,6 +55,7 @@ import f06.util.ArrayUtil;
 import f06.util.CaseSensitiveDictionary;
 import f06.util.IOUtil;
 import f06.util.ManifestEntry;
+import f06.util.ManifestUtil;
 
 /*
  * 4.4.2 Persistent Storage
@@ -346,7 +347,7 @@ class Storage {
 			bundleClassPath = ".";
 		}
 
-		ManifestEntry[] entries = ManifestEntry.parseEntry(bundleClassPath);
+		ManifestEntry[] entries = ManifestEntry.parse(bundleClassPath);
 
 		String[] classPaths = new String[0];
 
@@ -409,7 +410,7 @@ class Storage {
 					Constants.BUNDLE_NATIVECODE);
 
 			if (bundleNativeCode != null) {
-				entries = ManifestEntry.parseEntry(bundleNativeCode);
+				entries = ManifestEntry.parse(bundleNativeCode);
 				for (int i = 0; i < entries.length; i++) {
 					ManifestEntry entry = entries[i];
 					String libPath = entry.getName();
@@ -470,8 +471,8 @@ class Storage {
 				 * instead of JarInputStream.getManifest() who aspects
 				 * MANIFEST.MF as the first entry
 				 */
-				Manifest manifest = IOUtil.getJarManifest(new ByteArrayInputStream(byteArray));
-				Dictionary headers = IOUtil.toDictionary(manifest);
+				Manifest manifest = ManifestUtil.getJarManifest(new ByteArrayInputStream(byteArray));
+				Dictionary headers = ManifestUtil.toDictionary(manifest);
 
 				Version version = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));
 
@@ -479,7 +480,7 @@ class Storage {
 
 				File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
 				OutputStream os = new FileOutputStream(manifestFile);
-				IOUtil.storeManifest(headers, os);
+				ManifestUtil.storeManifest(headers, os);
 				os.close();
 
 				/*
@@ -493,7 +494,7 @@ class Storage {
 							") already installed.").toString());
 				}
 
-				ManifestEntry[] entries = ManifestEntry.parseEntry(headers.get(Constants.FRAGMENT_HOST));
+				ManifestEntry[] entries = ManifestEntry.parse(headers.get(Constants.FRAGMENT_HOST));
 				if (entries != null) {
 					/*
 					 * 3.15.2 Class Path Treatment
@@ -746,8 +747,8 @@ class Storage {
 				 * instead of JarInputStream.getManifest() who aspects
 				 * MANIFEST.MF as the first entry
 				 */
-				Manifest manifest = IOUtil.getJarManifest(new ByteArrayInputStream(byteArray));
-				Dictionary newHeaders = IOUtil.toDictionary(manifest);
+				Manifest manifest = ManifestUtil.getJarManifest(new ByteArrayInputStream(byteArray));
+				Dictionary newHeaders = ManifestUtil.toDictionary(manifest);
 				Version newVersion = Version.parseVersion((String) newHeaders.get(Constants.BUNDLE_VERSION));
 
 				if (newVersion.compareTo(currentVersion) > 0) {
@@ -758,7 +759,7 @@ class Storage {
 
 					File manifestFile = new File(newCache, "manifest.mf");
 					OutputStream os = new FileOutputStream(manifestFile);
-					IOUtil.storeManifest(newHeaders, os);
+					ManifestUtil.storeManifest(newHeaders, os);
 					os.close();
 
 					IOUtil.store(bundleFile, byteArray);
@@ -915,7 +916,7 @@ class Storage {
 			
 			manifest.read(new FileInputStream(manifestFile));
 
-			Dictionary headers = IOUtil.toDictionary(manifest);
+			Dictionary headers = ManifestUtil.toDictionary(manifest);
 			info.setHeaders(headers);
 
 			Version lastVersion = Version.parseVersion((String) headers.get(Constants.BUNDLE_VERSION));

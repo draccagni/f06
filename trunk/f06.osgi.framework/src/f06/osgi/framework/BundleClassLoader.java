@@ -180,7 +180,7 @@ class BundleClassLoader extends SecureClassLoader {
 		 * resource is not found, then the search continues with the next step.
 		 */
 		
-		ManifestEntry[] entries = ManifestEntry.parseEntry(host.getHeaders().get(Constants.REQUIRE_BUNDLE));
+		ManifestEntry[] entries = ManifestEntry.parse(host.getHeaders().get(Constants.REQUIRE_BUNDLE));
 		if (entries != null) {
 			for (int i = 0; i < entries.length; i++) {
 				ManifestEntry entry = entries[i];
@@ -303,7 +303,7 @@ class BundleClassLoader extends SecureClassLoader {
 		 */
 		
 		if (exportedPackages != null) {
-			entries = ManifestEntry.parseEntry(host.getHeaders().get(Constants.DYNAMICIMPORT_PACKAGE));
+			entries = ManifestEntry.parse(host.getHeaders().get(Constants.DYNAMICIMPORT_PACKAGE));
 			if (entries != null) {
 				for (int i = 0; i < entries.length; i++) {
 					ManifestEntry entry = entries[i];
@@ -397,7 +397,7 @@ class BundleClassLoader extends SecureClassLoader {
 		Dictionary headers = bundle.getHeaders();
 		
 		try {
-			ManifestEntry[] entries = ManifestEntry.parseEntry(headers.get(Constants.BUNDLE_NATIVECODE));
+			ManifestEntry[] entries = ManifestEntry.parse(headers.get(Constants.BUNDLE_NATIVECODE));
 			if (entries != null) {
 				for (int i = 0; i < entries.length; i++) {
 					ManifestEntry entry = entries[i];

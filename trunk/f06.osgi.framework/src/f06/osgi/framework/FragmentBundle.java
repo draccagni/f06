@@ -127,7 +127,7 @@ class FragmentBundle extends AbstractBundle {
 		
     	try {
     		if (host != null) {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(getHeaders().get(Constants.EXPORT_PACKAGE));
+				ManifestEntry[] entries = ManifestEntry.parse(getHeaders().get(Constants.EXPORT_PACKAGE));
 				
 				ExportedPackage[] exportedPackages = framework.getExportedPackages(host);
 				if (exportedPackages != null) {
@@ -181,7 +181,7 @@ class FragmentBundle extends AbstractBundle {
          */
 		try {
 			SecurityManager securityManager = System.getSecurityManager();
-			ManifestEntry[] entries = ManifestEntry.parseEntry(getHeaders().get(Constants.FRAGMENT_HOST));
+			ManifestEntry[] entries = ManifestEntry.parse(getHeaders().get(Constants.FRAGMENT_HOST));
 			if (entries != null) {
 			    String hostSymbolicName = entries[0].getName();
 				if (hostSymbolicName.equals(Constants.SYSTEM_BUNDLE_SYMBOLICNAME)) {
@@ -243,7 +243,7 @@ class FragmentBundle extends AbstractBundle {
 		String exportPackage = (String) getHeaders().get(Constants.EXPORT_PACKAGE);
 		if (exportPackage != null) {
 			try {
-				ManifestEntry[] entries = ManifestEntry.parseEntry(exportPackage);
+				ManifestEntry[] entries = ManifestEntry.parse(exportPackage);
 				for (int i = 0; i < entries.length; i++) {
 					ManifestEntry e = entries[i];
 					ExportedPackage[] oldExportedPackages = framework.getExportedPackages(e.getName());
