@@ -15,14 +15,11 @@
  */
 package f06.osgi.framework;
 
-import java.io.IOException;
-
 import org.osgi.framework.AdminPermission;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.FrameworkEvent;
-import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.startlevel.StartLevel;
 
@@ -102,11 +99,7 @@ public class StartLevelImpl implements StartLevel {
 			throw new IllegalArgumentException("System bundle start level cannot be changed.");
 		} 
 
-		try {
-			framework.setBundleStartLevel(bundle, startlevel);
-		} catch (IOException e) {
-			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
-		}
+		framework.setBundleStartLevel(bundle, startlevel);
 
 		int activeStartLevel = framework.getStartLevel();
 		

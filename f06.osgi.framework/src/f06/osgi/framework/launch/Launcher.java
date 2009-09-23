@@ -42,7 +42,7 @@ public class Launcher {
 	
 	public void launch(String args[]) throws Exception {
 		
-		String fc_path = "etc/framework";
+		String fc_path = "config/framework.properties";
 
 		printLicense();
 
@@ -117,7 +117,7 @@ public class Launcher {
 	}
 	
 	private void launch0(BundleContext context) throws Exception {
-		File[] files = new File("bundles").listFiles(new FileFilter() {
+		File[] files = new File("auto").listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
 				return pathname.getName().endsWith(".jar");
 			}
