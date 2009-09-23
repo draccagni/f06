@@ -52,7 +52,9 @@ class ExportedPackageImpl implements ExportedPackage {
 	}
 	
 	public Bundle getExportingBundle() {
-		return ((AbstractBundle) exportingBundle).isStale() ? null : exportingBundle;
+		return ((AbstractBundle) exportingBundle).isStale() ?
+				null :
+				exportingBundle;
 	}
 
 	public void setImportingBundles(Bundle[] importingBundles) {
@@ -60,7 +62,9 @@ class ExportedPackageImpl implements ExportedPackage {
 	}
 	
 	public Bundle[] getImportingBundles() {
-		return ((AbstractBundle) exportingBundle).isStale() ? null : importingBundles;
+		return ((AbstractBundle) exportingBundle).isStale() ? 
+				null : 
+				importingBundles;
 	}
 
 	public String getName() {
