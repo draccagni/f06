@@ -48,7 +48,7 @@ import f06.util.TextUtil;
  */
 
 class HostBundle extends AbstractBundle {
-	
+
 	private BundleActivator activator;
 	
 	protected BundleContext context;
@@ -191,7 +191,7 @@ class HostBundle extends AbstractBundle {
 	    		throw new BundleException(new StringBuilder(this.toString()).append(" cannot be started due to the Framework's current start level.").toString());
     	    }
     	} else {
-	    	framework.setBundleAutostartSetting(this, options == START_ACTIVATION_POLICY ? Constants0.BUNDLE_STARTED_WITH_DECLARED_ACTIVATION : Constants0.BUNDLE_STARTED_WITH_EAGER_ACTIVATION);    	    		
+	    	framework.setBundleAutostartSetting(this, options == START_ACTIVATION_POLICY ? AbstractBundle.STARTED_DECLARED : AbstractBundle.STARTED_EAGER);    	    		
     	}
 
 		/*
@@ -479,7 +479,7 @@ class HostBundle extends AbstractBundle {
 	     * 
 	     */
 	    if (options != STOP_TRANSIENT) {
-			framework.setBundleAutostartSetting(this, Constants0.BUNDLE_STOPPED);
+			framework.setBundleAutostartSetting(this, AbstractBundle.STOPPED);
 	    }
 		
 		/* JavaDoc If this bundle's state is not ACTIVE then this method returns immediately.

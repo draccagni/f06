@@ -63,9 +63,10 @@ import f06.util.ManifestUtil;
 
 class Storage {
 	
-	private final static String BUNDLE_VERSION_FOLDER = "c";
+	private final static String BUNDLE_CONTENT_FOLDER = "content";
 	private final static String BUNDLE_DATA_FOLDER = "data";
 	private final static String BUNDLE_INFO_FILE = "info";
+	private final static String BUNDLE_PERMISSIONS_FILE = "policy";
 	private final static String BUNDLE_MANIFEST_FILE = "manifest.mf";
 
 	static class BundleInfo implements Serializable {
@@ -100,7 +101,7 @@ class Storage {
 
 			this.lastModified = lastModified;
 
-			this.autostartSetting = Constants0.BUNDLE_STOPPED;
+			this.autostartSetting = AbstractBundle.STOPPED;
 			
 			this.startLevel = startLevel;
 		}
@@ -145,7 +146,7 @@ class Storage {
 			this.removalPending = removalPending;
 		}
 
-		public boolean getRemovalPending() {
+		public boolean isRemovalPending() {
 			return removalPending;
 		}
 
@@ -155,6 +156,17 @@ class Storage {
 
 		public File getCache() {
 			return cache;
+		}
+		
+		public void store(File folder) throws IOException {
+			File file = new File(folder, BUNDLE_INFO_FILE);
+			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
+
+			ObjectOutputStream oos = new ObjectOutputStream(os);
+			oos.writeObject(this);
+			os.flush();
+			os.close();
+
 		}
 	}
 
@@ -181,6 +193,7 @@ class Storage {
 	private Object permissionsLock;
 	
     private Map classPathsByBundle;
+	public final static String BUNDLE_FILE                        		= "bundle";
 	
 	
 	private static volatile boolean firstInit = true;
@@ -282,7 +295,7 @@ class Storage {
 
 	private File getBundlePermissionsFile(Bundle bundle) {
 		File permissionsFile = new File(getBundleFolder(bundle.getBundleId()),
-				"policy");
+				BUNDLE_PERMISSIONS_FILE);
 
 		return permissionsFile;
 	}
@@ -302,7 +315,7 @@ class Storage {
 	}
 
 	private File createNewCache(long bundleId, Version version) {
-		File rootCache = new File(getBundleFolder(bundleId), BUNDLE_VERSION_FOLDER);
+		File rootCache = new File(getBundleFolder(bundleId), BUNDLE_CONTENT_FOLDER);
 		if (!rootCache.exists()) {
 			rootCache.mkdirs();
 		}
@@ -572,14 +585,14 @@ class Storage {
 				/*
 				 * Create BundleInfo instance
 				 */
-				File bundleFile = new File(cache, Constants0.BUNDLE_FILE);
+				File bundleFile = new File(cache, Storage.BUNDLE_FILE);
 				IOUtil.store(bundleFile, byteArray);
 
 				long lastModified = bundleFile.lastModified();
 				BundleInfo info = new BundleInfo(bundleId, location, lastModified, framework.getInitialBundleStartLevel());
 				info.setHeaders(headers);
-				info.setCache(cache);
-				storeBundleInfo(info);
+				info.setCache(cache);	
+				info.store(getBundleFolder(bundleId));
 				
 				bundleInfosByBundle.put(bundle, info);
 
@@ -606,6 +619,7 @@ class Storage {
 					}
 				}
 
+				e.printStackTrace();
 				throw new BundleException(e.getMessage(), e);
 			}
 		}
@@ -661,7 +675,7 @@ class Storage {
 
 			info.setRemovalPending(true);
 
-			storeBundleInfo(info);
+			info.store(getBundleFolder(bundle.getBundleId()));
 		} catch (IOException e) {
 			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
 		}
@@ -755,7 +769,7 @@ class Storage {
 					long newBundleId = bundle.getBundleId();
 					newCache = createNewCache(newBundleId, newVersion);
 
-					File bundleFile = new File(newCache, Constants0.BUNDLE_FILE);
+					File bundleFile = new File(newCache, Storage.BUNDLE_FILE);
 
 					File manifestFile = new File(newCache, "manifest.mf");
 					OutputStream os = new FileOutputStream(manifestFile);
@@ -785,11 +799,11 @@ class Storage {
 					newInfo.setAutostartSetting(currentInfo
 							.getAutostartSetting());
 
-					storeBundleInfo(newInfo);
+					newInfo.store(getBundleFolder(bundle.getBundleId()));
 
 					currentInfo.setRemovalPending(true);
 					try {
-						storeBundleInfo(currentInfo);
+						currentInfo.store(getBundleFolder(bundle.getBundleId()));
 					} catch (IOException e) {
 						throw new BundleException(e.getMessage());
 					}
@@ -866,7 +880,7 @@ class Storage {
 
 		headers.put(Constants.EXPORT_PACKAGE, exportPackages.toString());
 		
-		info.setAutostartSetting(Constants0.BUNDLE_STARTED_WITH_EAGER_ACTIVATION);
+		info.setAutostartSetting(AbstractBundle.STARTED_EAGER);
 		info.setHeaders(headers);
 		
 		bundleInfosByBundle = new WeakHashMap();
@@ -882,7 +896,7 @@ class Storage {
 
 	private Bundle fetchBundle(File bundleFolder) {
 		try {
-			File[] caches = new File(bundleFolder, "c").listFiles();
+			File[] caches = bundleFolder.listFiles();
 			Arrays.sort(caches, new Comparator() {
 				public int compare(Object arg0, Object arg1) {
 					return - Version.parseVersion(((File) arg0).getName()).compareTo(Version.parseVersion(((File) arg1).getName()));
@@ -890,26 +904,21 @@ class Storage {
 			});
 			
 
-			BundleInfo info = null;
-
-			File bundleInfoFile = new File(bundleFolder, BUNDLE_INFO_FILE);
-
-			info = fetchBundleInfo(bundleInfoFile);
-
+			File cache = caches[0];
+			File bundleInfoFile = new File(cache, BUNDLE_INFO_FILE);
+			BundleInfo info = fetchBundleInfo(bundleInfoFile);
 			/*
 			 * If the bundle has been uninstalled, remove it completly from the
-			 * storege and return null.
+			 * storage and return null.
 			 */
-			if (info == null || info.getRemovalPending()) {
+			if (info == null || info.isRemovalPending()) {
 				IOUtil.delete(bundleFolder);
 
 				return null;
 			}
-
-			File cache = caches[0];
 			info.setCache(cache);
 			
-			File bundleFile = new File(cache, Constants0.BUNDLE_FILE);
+			File bundleFile = new File(cache, Storage.BUNDLE_FILE);
 
 			File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
 			Manifest manifest = new Manifest();
@@ -988,18 +997,6 @@ class Storage {
 		return info;
 	}
 
-	private void storeBundleInfo(BundleInfo info) throws IOException {
-		synchronized (bundleInfosLock) {
-			File file = new File(getBundleFolder(info.getBundleId()), BUNDLE_INFO_FILE);
-			OutputStream os = new BufferedOutputStream(new FileOutputStream(file));
-
-			ObjectOutputStream oos = new ObjectOutputStream(os);
-			oos.writeObject(info);
-			os.flush();
-			os.close();
-		}
-	}
-
 	/*
 	 * StartLevel
 	 */
@@ -1014,14 +1011,14 @@ class Storage {
 		info.setAutostartSetting(autostartSetting);
 
 		try {
-			storeBundleInfo(info);
+			info.store(getBundleFolder(bundle.getBundleId()));
 		} catch (IOException e) {
 			framework.log(LogService.LOG_ERROR, e.getMessage(), e);
 		}
 	}
 
 	public boolean isBundlePersistentlyStarted(Bundle bundle) {
-		return getBundleAutostartSetting(bundle) != Constants0.BUNDLE_STOPPED;
+		return getBundleAutostartSetting(bundle) != AbstractBundle.STOPPED;
 	}
 
 	void setBundleStartLevel(Bundle bundle, int startlevel) throws IOException {
@@ -1029,7 +1026,7 @@ class Storage {
 			BundleInfo info = getBundleInfo(bundle);
 			info.setStartLevel(startlevel);
 
-			storeBundleInfo(info);
+			info.store(getBundleFolder(bundle.getBundleId()));
 		}
 	}
 

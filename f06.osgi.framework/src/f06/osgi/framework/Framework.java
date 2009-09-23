@@ -1388,13 +1388,13 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 				ClassLoader parent;
 				String bundleParent = getProperty(Constants.FRAMEWORK_BUNDLE_PARENT);
 				if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_BOOT)) {
-					parent = getClass().getClassLoader();
+					parent = ClassLoader.getSystemClassLoader();
 				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_APP)) {
-					parent = getClass().getClassLoader();
+					parent = ClassLoader.getSystemClassLoader();
 				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_EXT)) {
-					parent = getClass().getClassLoader();
+					parent = ClassLoader.getSystemClassLoader().getParent();
 				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK)) {
-					parent = getClass().getClassLoader();
+					parent = Framework.class.getClassLoader();
 				} else {
 					throw new IllegalArgumentException(new StringBuilder("Unknown parent class loader type: ").append(bundleParent).toString());
 				}
@@ -1591,7 +1591,7 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 			throw new IllegalArgumentException(new StringBuilder(bundle.toString()).append(" has been uninstalled.").toString());
 		}
 		
-		return getBundleAutostartSetting(bundle) == Constants0.BUNDLE_STARTED_WITH_DECLARED_ACTIVATION; 
+		return getBundleAutostartSetting(bundle) == AbstractBundle.STARTED_DECLARED; 
 	}
 
 	int getBundleAutostartSetting(Bundle bundle) {
