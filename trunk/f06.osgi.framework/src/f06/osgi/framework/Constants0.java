@@ -17,20 +17,14 @@ package f06.osgi.framework;
 
 
 
-public interface Constants0 {
+interface Constants0 {
 	
 	final static String LISTENERCLASS                           = "listenerClass";
-	final static String BUNDLE_COMPANY_ATTRIBUTE                = "company";
 	final static String DIRECTIVE                               = ":=";
 	final static String WILDCARD                                = "*";
 
 	final static String BUNDLE_ID                               = "bundleId";
-	
-	final static int    BUNDLE_STARTED_WITH_EAGER_ACTIVATION    = 0x00000000;
-	final static int    BUNDLE_STARTED_WITH_DECLARED_ACTIVATION = 0x00000002;
-	final static int    BUNDLE_STOPPED                          = 0xFFFFFFFF;
-	
-	final static String BUNDLE_FILE                        		= "bundle";
+	final static String BUNDLE_COMPANY_ATTRIBUTE                = "company";
 
 	final static String SYSTEM_BUNDLE_SYMBOLICNAME              = "system.bundle";
 	final static String SYSTEM_BUNDLE_NAME                      = "F06 R4.2";

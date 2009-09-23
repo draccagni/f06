@@ -470,12 +470,6 @@ class BundleClassLoader extends SecureClassLoader {
 	
 	protected Class findClass(String name) throws ClassNotFoundException {
 		try {
-			String pkgName = FrameworkUtil.getClassPackage(name);
-			
-			if (name == null) {
-				int a = 1;
-			}
-			
 			String entryName = name.replace('.', '/').concat(".class");
 			InputStream is = null;
 			Bundle bundle = null;
@@ -489,6 +483,7 @@ class BundleClassLoader extends SecureClassLoader {
 			}
 
 			if (is != null) {
+				String pkgName = FrameworkUtil.getClassPackage(name);
 				Package pkg = getPackage(pkgName);
 
 				URL codesourceURL = new URL(bundle.getLocation());
@@ -497,7 +492,7 @@ class BundleClassLoader extends SecureClassLoader {
 					if (pkg.isSealed()) {
 						if (!pkg.isSealed(codesourceURL)) {
 							throw new SecurityException(
-									new StringBuilder("Sealing violation: package ").append(pkgName).append(" is sealed").toString());
+								new StringBuilder("Sealing violation: package ").append(pkgName).append(" is sealed").toString());
 						}
 					}
 				} else {

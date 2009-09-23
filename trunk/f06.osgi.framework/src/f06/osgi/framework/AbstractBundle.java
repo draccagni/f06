@@ -48,6 +48,12 @@ abstract class AbstractBundle implements Bundle {
 	
 	protected volatile boolean stale;
 
+	final static int STOPPED          = 0xFFFFFFFF;
+
+	final static int STARTED_DECLARED = 0x00000002;
+
+	final static int STARTED_EAGER    = 0x00000000;
+
 	public AbstractBundle(Framework framework) {
 		this.framework = framework;
 		
