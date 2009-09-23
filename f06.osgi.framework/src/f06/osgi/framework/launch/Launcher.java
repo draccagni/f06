@@ -117,7 +117,7 @@ public class Launcher {
 	}
 	
 	private void launch0(BundleContext context) throws Exception {
-		File[] files = new File("opt").listFiles(new FileFilter() {
+		File[] files = new File("bundles").listFiles(new FileFilter() {
 			public boolean accept(File pathname) {
 				return pathname.getName().endsWith(".jar");
 			}
@@ -140,7 +140,7 @@ public class Launcher {
 				String location = files[i].toURI().toURL().toString();
 				for (int j = 0; j < bundles.length; j++) {
 					if (bundles[j].getLocation().equals(location)) {
-						bundles[j].update();
+//						bundles[j].update();
 						
 						continue NEXT_BUNDLE;
 					}
