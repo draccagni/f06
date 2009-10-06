@@ -1,0 +1,7 @@
+(org.osgi.framework.PackagePermission "*" "import,export")
+(java.net.SocketPermission "*" "accept,connect,listen,resolve")
+(java.lang.RuntimePermission "*" "*")
+(org.osgi.framework.AdminPermission "*" "*")
+(org.osgi.framework.ServicePermission "*" "get,register")
+(java.util.PropertyPermission "*" "read")
+(java.io.FilePermission "<<ALL FILES>>" "read")
