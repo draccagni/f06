@@ -27,7 +27,6 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 
 import sun.net.util.IPAddressUtil;
 
-
 class BundleURLStreamHandlerService extends URLStreamHandler implements URLStreamHandlerService {
 	
 	public final static String BUNDLE_PROTOCOL = "bundle";
@@ -52,10 +51,8 @@ class BundleURLStreamHandlerService extends URLStreamHandler implements URLStrea
 	 *  Example 
 	 *  
 	 *  		bundle://2.0.9.0:1/META-INF/MANIFEST.MF
-	 */
-	
+	 */	
 	public void parseURL(URLStreamHandlerSetter handler, URL u, String spec, int start, int limit) {
-
         // These fields may receive context content if this was relative URL
 		String protocol = u.getProtocol();
 		String authority = u.getAuthority();

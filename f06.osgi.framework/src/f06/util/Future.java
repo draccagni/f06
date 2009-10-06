@@ -17,11 +17,11 @@ package f06.util;
 
 public class Future implements Runnable {
 	
-	volatile boolean task_completed = false;
+	private volatile boolean task_completed = false;
 	
-	Object task_lock = new Object();
+	private Object task_lock = new Object();
 	
-	Runnable runnable;
+	private Runnable runnable;
 	
 	public Future(Runnable inner) {
 		this.runnable = inner;

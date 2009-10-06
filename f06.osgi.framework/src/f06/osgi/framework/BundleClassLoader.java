@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Davide Raccagni (2006, 2008). All Rights Reserved.
+ * Copyright (c) Davide Raccagni (2006, 2009). All Rights Reserved.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,16 +151,16 @@ class BundleClassLoader extends SecureClassLoader {
 								* exporting class loader and the class or resource is not found, then the
 								* search terminates and the request fails.
 								*/
-								BundleClassLoader classLoader = ((ExportedPackageImpl) exportedPackage).getBundleClassLoader();
+								BundleClassLoader classLoader = (BundleClassLoader) ((ExportedPackageImpl) exportedPackage).classLoader;
 								
 								if (tClazz == Class.class) {
 									return classLoader.findClass(name);
 								} else if (tClazz == URL.class) {
-									URL u = classLoader.findEntry(name);
+									URL u = classLoader.findResource(name);
 
 									return u;
 								} else { // if (tClazz == Enumeration.class) {
-									Enumeration e = classLoader.findEntries(name);
+									Enumeration e = classLoader.findResources(name);
 
 									return e;
 								}
@@ -241,12 +241,12 @@ class BundleClassLoader extends SecureClassLoader {
 				// nothing
 			}
 		} else if (tClazz == URL.class) {
-			URL u = findEntry(name);
+			URL u = findResource(name);
 			if (u != null) {
 				return u;
 			}
 		} else if (tClazz == Enumeration.class) {
-			Enumeration e = findEntries(name);
+			Enumeration e = findResources(name);
 			if (e != null) {
 				return e;
 			}
@@ -331,7 +331,7 @@ class BundleClassLoader extends SecureClassLoader {
 									ArrayUtil.contains(bundles, exportedPackage.getExportingBundle())
 								) {
 								try {
-									BundleClassLoader classLoader = ((ExportedPackageImpl) exportedPackage).getBundleClassLoader();
+									BundleClassLoader classLoader = (BundleClassLoader) ((ExportedPackageImpl) exportedPackage).classLoader;
 									
 									Object object = classLoader.find1(name, tClazz);
 									if (object != null) {
@@ -344,7 +344,8 @@ class BundleClassLoader extends SecureClassLoader {
 											};
 										}
 										
-										((ExportedPackageImpl) exportedPackage).setImportingBundles(importingBundles);
+										// XXX see: Dependency Injection
+										((ExportedPackageImpl) exportedPackage).setImportingBundles0(importingBundles);
 
 										return object;
 									}
@@ -471,6 +472,7 @@ class BundleClassLoader extends SecureClassLoader {
 		return bundle;
 	}
 	
+	// Local
 	protected Class findClass(String name) throws ClassNotFoundException {
 		try {
 	        Class c = findLoadedClass(name);
@@ -554,7 +556,8 @@ class BundleClassLoader extends SecureClassLoader {
 	    throw new ClassNotFoundException(new StringBuilder("Class ").append(name).append(" not found.").toString());
 	}
 
-    protected URL findEntry(String name) {
+	// Local
+    protected URL findResource(String name) {
 		SecurityManager securityManager = System.getSecurityManager();
 	
 		if (securityManager != null) {
@@ -573,7 +576,8 @@ class BundleClassLoader extends SecureClassLoader {
 		return url;
 	}
     
-    private Enumeration findEntries(String name) {
+	// Local
+    protected Enumeration findResources(String name) {
     	return host.findEntries("", name, false);
     }
 
@@ -623,7 +627,7 @@ class BundleClassLoader extends SecureClassLoader {
 			 * then only this bundle must be searched for the specified resources. 
 			 */
 
-			Enumeration e = findEntries(name);
+			Enumeration e = findResources(name);
 			if (e == null) {
 				e = EMPTY_ENUMERATION;
 			}

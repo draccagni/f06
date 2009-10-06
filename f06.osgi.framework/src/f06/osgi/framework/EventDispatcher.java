@@ -62,10 +62,8 @@ class EventDispatcher {
 			return;
 		}
 
-//		Thread.dumpStack();
 		asyncExecutor.execute(new Runnable() {
 			public void run() {
-//				System.err.println(event);
 				dispatchEvent(event);
 			}
 		});

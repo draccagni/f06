@@ -25,7 +25,6 @@ import org.osgi.service.url.URLConstants;
 import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 
-
 class ContentHandlerTracker extends ServiceTracker {
 
 	public ContentHandlerTracker(BundleContext context) {

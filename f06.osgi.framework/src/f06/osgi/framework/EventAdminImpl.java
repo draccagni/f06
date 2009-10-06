@@ -22,7 +22,6 @@ import org.osgi.service.event.EventAdmin;
 /*
  * Reactor Design Pattern
  */
-
 public class EventAdminImpl implements EventAdmin {
 		
 	private BundleContext context;

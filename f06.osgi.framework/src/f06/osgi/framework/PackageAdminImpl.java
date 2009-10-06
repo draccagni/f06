@@ -49,7 +49,6 @@ import f06.util.SerialExecutorService;
  * 7.1.3  PackageAdmin (...) provides access to the internal structures of the Framework
  * related to package sharing, fragments and required bundles.
  */
-
 class PackageAdminImpl implements PackageAdmin {
 
 	class BundleListenerImpl implements BundleListener {
@@ -260,7 +259,7 @@ class PackageAdminImpl implements PackageAdmin {
 		if (entries == null)
 			return;
 		
-		BundleClassLoader classLoader = ((HostBundle) bundle).getBundleClassLoader();
+		ClassLoader classLoader = ((HostBundle) bundle).getClassLoader();
 		
 		NEXT_ENTRY: for (int i = 0; i < entries.length; i++) {
 			ManifestEntry entry = entries[i];
@@ -595,7 +594,7 @@ class PackageAdminImpl implements PackageAdmin {
 						importingBundles = (Bundle[]) ArrayUtil.add(importingBundles, host);
 					}
 					
-					((ExportedPackageImpl) exportedPackage).setImportingBundles(importingBundles);
+					((ExportedPackageImpl) exportedPackage).setImportingBundles0(importingBundles = importingBundles);
 					
 					continue NEXT_ENTRY;
 				}
@@ -658,7 +657,7 @@ class PackageAdminImpl implements PackageAdmin {
 							};
 						}
 						
-						((RequiredBundleImpl) requiredBundle).setRequiringBundles(requiringBundles);
+						((RequiredBundleImpl) requiredBundle).setRequiringBundles0(requiringBundles);
 						
 						continue NEXT_ENTRY;
 					}
@@ -699,7 +698,7 @@ class PackageAdminImpl implements PackageAdmin {
 						host
 				};
 
-				((RequiredBundleImpl) requiredBundle).setRequiringBundles(requiringBundles);
+				((RequiredBundleImpl) requiredBundle).setRequiringBundles0(requiringBundles);
 				
 				requiredBundles = (RequiredBundle[]) ArrayUtil.add(requiredBundles, requiredBundle);
 				
@@ -744,8 +743,8 @@ class PackageAdminImpl implements PackageAdmin {
 						if (importingBundles != null) {
 							if (ArrayUtil.contains(importingBundles, bundle)) {
 								importingBundles = (Bundle[]) ArrayUtil.remove(importingBundles, bundle);
-								
-								((ExportedPackageImpl) exportedPackage).setImportingBundles(importingBundles);
+								// XXX see: Dependency Injection
+								((ExportedPackageImpl) exportedPackage).setImportingBundles0(importingBundles);
 							}
 						}
 					}
@@ -789,7 +788,7 @@ class PackageAdminImpl implements PackageAdmin {
 									requiringBundles = null;
 								}
 								
-								((RequiredBundleImpl) requiredBundle).setRequiringBundles(requiringBundles);
+								((RequiredBundleImpl) requiredBundle).setRequiringBundles0(requiringBundles);
 							}
 						}
 					}
@@ -1271,7 +1270,8 @@ class PackageAdminImpl implements PackageAdmin {
 							}
 							
 							((AbstractBundle) bundle0).setState(Bundle.INSTALLED);
-							((AbstractBundle) bundle0).setStale(false);
+							// XXX out of specs
+							((AbstractBundle) bundle0).stale = false;
 
 							/*
 							 * 4.6.1  When a set of bundles are refreshed using the Package

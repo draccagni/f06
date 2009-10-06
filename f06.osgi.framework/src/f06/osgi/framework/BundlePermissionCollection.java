@@ -47,6 +47,7 @@ public class BundlePermissionCollection extends PermissionCollection {
 	}; 
 	
 	private transient PermissionInfo[] permissionInfos;
+	
 	private boolean hasAllPermissions;
 	
 	BundlePermissionCollection(PermissionInfo[] permissionInfos) {

@@ -18,6 +18,7 @@ package f06.osgi.framework;
 import org.osgi.framework.Version;
 
 public class VersionRange {
+	
 	private static final Version MAX_VERSION = new Version(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 
 	private String range;

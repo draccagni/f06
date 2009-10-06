@@ -21,14 +21,12 @@ import java.net.URL;
 import java.util.Enumeration;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 /*
  * BundleContent is defined for each bundle (host and fragment bundle) and permits
  * to access to jar file content
  */
-
 class SystemBundleURLClassPath implements BundleURLClassPath {
 
 	private Framework framework;
@@ -93,7 +91,7 @@ class SystemBundleURLClassPath implements BundleURLClassPath {
 	}
 	
 	public InputStream getEntryAsStream(int port, String name) throws IOException {
-		return getEntry(name).openStream();
+		return framework.getClass().getClassLoader().getResourceAsStream(name);
 	}
 	
 	public Bundle getBundle() {

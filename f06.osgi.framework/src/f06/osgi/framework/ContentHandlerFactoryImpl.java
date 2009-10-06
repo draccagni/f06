@@ -22,21 +22,18 @@ import org.osgi.framework.BundleContext;
 
 class ContentHandlerFactoryImpl implements ContentHandlerFactory {
 
-	public static ContentHandlerFactoryImpl instance = new ContentHandlerFactoryImpl();
+//	public static ContentHandlerFactoryImpl instance = new ContentHandlerFactoryImpl();
 	
     private ContentHandlerTracker tracker;
 
-    private ContentHandlerFactoryImpl() {
-    }
-    
-    public void setContext(BundleContext context) {
+    ContentHandlerFactoryImpl(BundleContext context) {
     	this.tracker = new ContentHandlerTracker(context);
     }
 
 	public ContentHandler createContentHandler(String mimetype) {
-		tracker.open();
+		this.tracker.open();
 		
-		ContentHandler handler = tracker.getContentHandler(mimetype);
+		ContentHandler handler = this.tracker.getContentHandler(mimetype);
 
 		return handler;
 	}

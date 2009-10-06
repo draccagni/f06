@@ -15,19 +15,18 @@
  */
 package f06.osgi.framework;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
+import java.net.ContentHandlerFactory;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLStreamHandlerFactory;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -300,19 +299,14 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 			 * The OSGi Framework must register a java.net.URLStreamHandlerFactory object and a 
 			 * java.net.ContentHandlerFactory object with the java.net.URL.setURLStreamHandlerFactory
 			 * and java.net.URLConnection.setContentHandlerFactory methods, respectively.
-			 */
+			 */		
+		    URL.setURLStreamHandlerFactory(
+		    		new URLStreamHandlerFactoryImpl(context)
+		    	);
 
-			URLStreamHandlerFactoryImpl.instance.setContext(context);
-			
-			ContentHandlerFactoryImpl.instance.setContext(context);
-			
-			try {
-			    URL.setURLStreamHandlerFactory(URLStreamHandlerFactoryImpl.instance);
-
-			    URLConnection.setContentHandlerFactory(ContentHandlerFactoryImpl.instance);
-			} catch (Throwable t) {
-				// do nothing
-			}
+		    URLConnection.setContentHandlerFactory(
+		    		new ContentHandlerFactoryImpl(context)
+		    	);
 			
 			Dictionary d = new CaseSensitiveDictionary(false);
 			d.put(URLConstants.URL_HANDLER_PROTOCOL, new String[] { "bundle" });
@@ -1258,82 +1252,82 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		LogService logService = (LogService) logServiceTracker.getService();
 		if (logService != null) {
 			logService.log(level, message, exception);
-		} else {
-			StringBuilder sb = new StringBuilder();
-			
-			Calendar calendar = Calendar.getInstance();
-			
-			sb.append(calendar.get(Calendar.YEAR));
-			sb.append('-');
-			int month = calendar.get(Calendar.MONTH) + 1;
-			if (month < 10) {
-				sb.append('0');
-			}
-			sb.append(month);
-			sb.append('-');
-			int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-			if (dayOfMonth < 10) {
-				sb.append('0');
-			}
-			sb.append(dayOfMonth);
-			sb.append(' ');
-			int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
-			if (hourOfDay < 10) {
-				sb.append('0');
-			}
-			sb.append(hourOfDay);
-			sb.append(':');
-			int minute = calendar.get(Calendar.MINUTE);
-			if (minute < 10) {
-				sb.append('0');
-			}
-			sb.append(minute);
-			sb.append(':');
-			int second = calendar.get(Calendar.SECOND);
-			if (second < 10) {
-				sb.append('0');
-			}
-			sb.append(second);
-			sb.append('.');
-			int millisecond = calendar.get(Calendar.MILLISECOND);
-			if (millisecond < 100) {
-				sb.append('0');
-
-				if (millisecond < 10) {
-					sb.append('0');
-				}
-			}
-			sb.append(millisecond);
-
-			sb.append(" ");
-			
-			switch (level) {
-			case LogService.LOG_ERROR:
-				sb.append("ERROR");
-				break;
-			case LogService.LOG_WARNING:
-				sb.append("WARNING");
-				break;
-			case LogService.LOG_INFO:
-				sb.append("INFO");
-				break;
-			default:
-				sb.append("DEBUG");
-				break;
-			}
-			
-			sb.append(": ");
-
-			sb.append(message);
-			
-			if (exception != null) {
-				sb.append("\n");
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				exception.printStackTrace(new PrintStream(baos));
-				sb.append(baos.toString());
-			}
-			
-			System.err.println(sb.toString());
+//		} else {
+//			StringBuilder sb = new StringBuilder();
+//			
+//			Calendar calendar = Calendar.getInstance();
+//			
+//			sb.append(calendar.get(Calendar.YEAR));
+//			sb.append('-');
+//			int month = calendar.get(Calendar.MONTH) + 1;
+//			if (month < 10) {
+//				sb.append('0');
+//			}
+//			sb.append(month);
+//			sb.append('-');
+//			int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+//			if (dayOfMonth < 10) {
+//				sb.append('0');
+//			}
+//			sb.append(dayOfMonth);
+//			sb.append(' ');
+//			int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+//			if (hourOfDay < 10) {
+//				sb.append('0');
+//			}
+//			sb.append(hourOfDay);
+//			sb.append(':');
+//			int minute = calendar.get(Calendar.MINUTE);
+//			if (minute < 10) {
+//				sb.append('0');
+//			}
+//			sb.append(minute);
+//			sb.append(':');
+//			int second = calendar.get(Calendar.SECOND);
+//			if (second < 10) {
+//				sb.append('0');
+//			}
+//			sb.append(second);
+//			sb.append('.');
+//			int millisecond = calendar.get(Calendar.MILLISECOND);
+//			if (millisecond < 100) {
+//				sb.append('0');
+//
+//				if (millisecond < 10) {
+//					sb.append('0');
+//				}
+//			}
+//			sb.append(millisecond);
+//
+//			sb.append(" ");
+//			
+//			switch (level) {
+//			case LogService.LOG_ERROR:
+//				sb.append("ERROR");
+//				break;
+//			case LogService.LOG_WARNING:
+//				sb.append("WARNING");
+//				break;
+//			case LogService.LOG_INFO:
+//				sb.append("INFO");
+//				break;
+//			default:
+//				sb.append("DEBUG");
+//				break;
+//			}
+//			
+//			sb.append(": ");
+//
+//			sb.append(message);
+//			
+//			if (exception != null) {
+//				sb.append("\n");
+//				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//				exception.printStackTrace(new PrintStream(baos));
+//				sb.append(baos.toString());
+//			}
+//			
+//			System.err.println(sb.toString());
 		}
 	}
 
@@ -1349,66 +1343,45 @@ public class Framework extends HostBundle implements org.osgi.framework.launch.F
 		return bootDelegatedPackageNames.contains(pkgName);
 	}	
 
-//	void removeBundleClassLoader(Bundle host) {
-//		synchronized (classLoadersByBundleLock) {
-//			classLoadersByBundle.remove(host);
-//		}
-//	}
-
 	BundleClassLoader createBundleClassLoader(Bundle host) {
-//		synchronized (classLoadersByBundleLock) {
-//			String version = Version.parseVersion((String) host.getHeaders().get(Constants.BUNDLE_VERSION)).toString();
-//			
-//			long key = Arrays.hashCode(new Object[] {
-//				host,
-//				version
-//			});
-//			
-			BundleClassLoader classLoader; // = (BundleClassLoader) classLoadersByBundle.get(key);
-//			if (classLoader == null) {
-				SecurityManager securityManager = System.getSecurityManager();
-				if (securityManager != null) {
-					securityManager.checkCreateClassLoader();
-				}
-				
-				
-				BundleURLClassPath[] classPaths = new BundleURLClassPath[] {
-					getBundleURLClassPath(host)
-				};
+		SecurityManager securityManager = System.getSecurityManager();
+		if (securityManager != null) {
+			securityManager.checkCreateClassLoader();
+		}
+		
+		BundleURLClassPath[] classPaths = new BundleURLClassPath[] {
+			getBundleURLClassPath(host)
+		};
 
-				Bundle[] fragments = getFragments0(host);
-				if (fragments != null) {
-					for (int i = 0; i < fragments.length; i++) {
-						classPaths = (BundleURLClassPath[]) ArrayUtil.add(classPaths, getBundleURLClassPath(fragments[i]));
-					}
-				}
-				
-				// TODO
-				ClassLoader parent;
-				String bundleParent = getProperty(Constants.FRAMEWORK_BUNDLE_PARENT);
-				if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_BOOT)) {
-					parent = ClassLoader.getSystemClassLoader();
-				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_APP)) {
-					parent = ClassLoader.getSystemClassLoader();
-				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_EXT)) {
-					parent = ClassLoader.getSystemClassLoader().getParent();
-				} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK)) {
-					parent = Framework.class.getClassLoader();
-				} else {
-					throw new IllegalArgumentException(new StringBuilder("Unknown parent class loader type: ").append(bundleParent).toString());
-				}
-				
-				if (host == Framework.this) {
-					classLoader = new SystemBundleClassLoader(parent, Framework.this, classPaths);
-				} else {
-					classLoader = new BundleClassLoader(parent, Framework.this, host, classPaths);
-				}
-				
-//				classLoadersByBundle.put(key, classLoader);
-//			}
-			
-			return classLoader;
-//		}
+		Bundle[] fragments = getFragments0(host);
+		if (fragments != null) {
+			for (int i = 0; i < fragments.length; i++) {
+				classPaths = (BundleURLClassPath[]) ArrayUtil.add(classPaths, getBundleURLClassPath(fragments[i]));
+			}
+		}
+		
+		ClassLoader parent;
+		String bundleParent = getProperty(Constants.FRAMEWORK_BUNDLE_PARENT);
+		if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_BOOT)) {
+			parent = ClassLoader.getSystemClassLoader();
+		} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_APP)) {
+			parent = ClassLoader.getSystemClassLoader();
+		} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_EXT)) {
+			parent = ClassLoader.getSystemClassLoader().getParent();
+		} else if (bundleParent == null || bundleParent.equals(Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK)) {
+			parent = Framework.class.getClassLoader();
+		} else {
+			throw new IllegalArgumentException(new StringBuilder("Unknown parent class loader type: ").append(bundleParent).toString());
+		}
+		
+		BundleClassLoader classLoader0;
+		if (host == Framework.this) {
+			classLoader0 = new SystemBundleClassLoader(parent, Framework.this, classPaths);
+		} else {
+			classLoader0 = new BundleClassLoader(parent, Framework.this, host, classPaths);
+		}
+		
+		return classLoader0;
 	}
 
 	/*

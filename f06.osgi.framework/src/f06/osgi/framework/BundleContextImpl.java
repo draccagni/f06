@@ -50,8 +50,7 @@ class BundleContextImpl implements BundleContext {
 	protected Map counts;
 	
 	protected Map serviceFactories;
-	
-	
+		
 	public BundleContextImpl(Framework framework, Bundle host) {
 		this.framework = framework;
 		this.host = host;

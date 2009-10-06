@@ -42,7 +42,6 @@ class URLStreamHandlerProxy extends URLStreamHandler implements URLStreamHandler
 
 	/**
 	 * @see "java.net.URLStreamHandler.setURL(URL,String,String,int,String,String)"
-	 * 
 	 * @deprecated This method is only for compatibility with handlers written
 	 *             for JDK 1.1.
 	 */

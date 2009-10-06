@@ -22,20 +22,31 @@ import org.osgi.service.packageadmin.ExportedPackage;
 class ExportedPackageImpl implements ExportedPackage {
 
 	private Bundle exportingBundle;
-	private Bundle[] importingBundles;
-	private String name;
-	private String specificationVersion;
-	private Version version;
-	private boolean removalPending;
-	private String company;
-	private String[] uses;
-	private String[] mandatory;
-	private String[] include;
-	private String[] exclude;
-	// XXX
-	private BundleClassLoader classLoader;
 	
-	public ExportedPackageImpl(Bundle exportingBundle, String name, String specificationVersion, Version version, String company, String[] uses, String[] mandatory, String[] include, String[] exclude, BundleClassLoader classLoader) {
+	private volatile Bundle[] importingBundles;
+	
+	private String name;
+	
+	private String specificationVersion;
+	
+	private Version version;
+	
+	private volatile boolean removalPending;
+	
+	private String company;
+	
+	private String[] uses;
+	
+	private String[] mandatory;
+	
+	private String[] include;
+	
+	private String[] exclude;
+	
+	// XXX out of specs
+	final ClassLoader classLoader;
+	
+	public ExportedPackageImpl(Bundle exportingBundle, String name, String specificationVersion, Version version, String company, String[] uses, String[] mandatory, String[] include, String[] exclude, ClassLoader classLoader) {
 		this.exportingBundle = exportingBundle;
 		this.importingBundles = null;
 		this.name = name;
@@ -52,17 +63,19 @@ class ExportedPackageImpl implements ExportedPackage {
 	}
 	
 	public Bundle getExportingBundle() {
-		return ((AbstractBundle) exportingBundle).isStale() ?
+		// XXX out of specs
+		return ((AbstractBundle) exportingBundle).isStale0() ?
 				null :
 				exportingBundle;
 	}
 
-	public void setImportingBundles(Bundle[] importingBundles) {
+	void setImportingBundles0(Bundle[] importingBundles) {
 		this.importingBundles = importingBundles;
 	}
 	
 	public Bundle[] getImportingBundles() {
-		return ((AbstractBundle) exportingBundle).isStale() ? 
+		// XXX out of specs
+		return ((AbstractBundle) exportingBundle).isStale0() ?
 				null : 
 				importingBundles;
 	}
@@ -103,7 +116,7 @@ class ExportedPackageImpl implements ExportedPackage {
 		return uses;
 	}
 
-	public void setRemovalPending(boolean removalPending) {
+	void setRemovalPending0(boolean removalPending) {
 		this.removalPending = removalPending;
 	}
 	
@@ -119,8 +132,7 @@ class ExportedPackageImpl implements ExportedPackage {
 			append(specificationVersion);
 		}
 		
-		sb.append(",exportingBundle=").
-		append(getExportingBundle());
+		sb.append(",exportingBundle=").append(getExportingBundle());
 
 		Bundle[] importingBundles = getImportingBundles(); 
 		
@@ -178,13 +190,11 @@ class ExportedPackageImpl implements ExportedPackage {
 			sb.append(']');
 		}
 
-		sb.append(",removalPending=").
-			append(isRemovalPending());
+		sb.append(",removalPending=").append(isRemovalPending());
 
 		String company = getCompany();
 		if (company != null) {
-			sb.append(",company=").
-			append(company);
+			sb.append(",company=").append(company);
 		}
 
 		sb.append(")");
@@ -192,7 +202,7 @@ class ExportedPackageImpl implements ExportedPackage {
 		return sb.toString();
 	}
 	
-	public BundleClassLoader getBundleClassLoader() {
+	ClassLoader getClassLoader0() {
 		return classLoader;
 	}
 }

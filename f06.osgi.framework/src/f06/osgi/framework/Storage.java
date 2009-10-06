@@ -17,7 +17,6 @@ package f06.osgi.framework;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -60,10 +59,10 @@ import f06.util.ManifestUtil;
 /*
  * 4.4.2 Persistent Storage
  */
-
 class Storage {
 	
-	private final static String BUNDLE_TEMP_FOLDER = "cache";
+	private final static String TEMP_FOLDER = "temp";
+	private final static String BUNDLES_FOLDER = "bundles";
 	private final static String BUNDLE_CACHE_FOLDER = "cache";
 	private final static String BUNDLE_DATA_FOLDER = "data";
 	private final static String BUNDLE_INFO_FILE = "bundleinfo";
@@ -242,7 +241,7 @@ class Storage {
 		synchronized (bundlesLock) {
 			fetchSystemBundle();
 			
-			File[] files = storagePath.listFiles();
+			File[] files = getBundlesFolder().listFiles();
 
 			if (files != null) {
 				for (int i = 0; i < files.length; i++) {
@@ -268,7 +267,7 @@ class Storage {
 
 		File bundleFolder = (File) bundleFoldersById.get(key);
 		if (bundleFolder == null) {
-			bundleFolder = new File(storagePath, Long.toString(bundleId));
+			bundleFolder = new File(getBundlesFolder(), Long.toString(bundleId));
 			bundleFoldersById.put(key, bundleFolder);
 		}
 
@@ -316,7 +315,16 @@ class Storage {
 	}
 	
 	public synchronized File getTempFolder() {
-		File temp = new File(BUNDLE_TEMP_FOLDER);
+		File temp = new File(storagePath, TEMP_FOLDER);
+		if (!temp.exists()) {
+			temp.mkdirs();
+		}
+		
+		return temp;
+	}
+
+	public synchronized File getBundlesFolder() {
+		File temp = new File(storagePath, BUNDLES_FOLDER);
 		if (!temp.exists()) {
 			temp.mkdirs();
 		}
@@ -940,9 +948,9 @@ class Storage {
 			info.setCache(cache);
 			
 
-			File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
-			Manifest manifest = new Manifest();
-			manifest.read(new FileInputStream(manifestFile));
+			Manifest manifest = ManifestUtil.getJarManifest(new FileInputStream(new File(cache, BUNDLE_FILE)));
+//			File manifestFile = new File(cache, BUNDLE_MANIFEST_FILE);
+//			Manifest manifest = new Manifest();
 			Dictionary headers = ManifestUtil.toDictionary(manifest);
 
 			info.setHeaders(headers);
