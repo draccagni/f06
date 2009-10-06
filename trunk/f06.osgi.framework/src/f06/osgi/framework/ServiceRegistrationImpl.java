@@ -71,7 +71,6 @@ class ServiceRegistrationImpl implements ServiceRegistration {
 		 * JavaDoc  The service's properties are replaced with the provided properties.
 		 * A service event of type ServiceEvent.MODIFIED is fired.
 		 */
-
 		ServiceEvent serviceEvent = new ServiceEvent(ServiceEvent.MODIFIED, reference);
 		framework.postServiceEvent(serviceEvent);
 	}

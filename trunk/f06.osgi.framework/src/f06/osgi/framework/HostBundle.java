@@ -40,13 +40,11 @@ import org.osgi.service.packageadmin.RequiredBundle;
 import f06.util.ManifestEntry;
 import f06.util.TextUtil;
 
-
 /*
  * 3.2  A bundle is deployed as a Java ARchive (JAR) file. JAR files are used to store
  * applications and their resources in a standard ZIP-based file format. This format is defined
  * by [27] Zip File Format. A bundle is a JAR file that:
  */
-
 class HostBundle extends AbstractBundle {
 
 	private BundleActivator activator;
@@ -85,7 +83,7 @@ class HostBundle extends AbstractBundle {
 			}
 		}
 		
-		BundleClassLoader classLoader = getBundleClassLoader();
+		ClassLoader classLoader = getClassLoader();
 		
 		return classLoader.getResource(name);
 	}
@@ -112,7 +110,7 @@ class HostBundle extends AbstractBundle {
 			}
 		}
 
-		BundleClassLoader classLoader = getBundleClassLoader();
+		ClassLoader classLoader = getClassLoader();
 		
 		return classLoader.getResources(name);
 	}
@@ -151,7 +149,7 @@ class HostBundle extends AbstractBundle {
 			throw new IllegalStateException(new StringBuilder("Attempting to load a class from uninstalled Bundle(id=").append(getBundleId()).append(").").toString());
 		}
 		
-		BundleClassLoader classLoader = getBundleClassLoader();
+		ClassLoader classLoader = getClassLoader();
 		
 		return classLoader.loadClass(name);
 	}
@@ -360,7 +358,7 @@ class HostBundle extends AbstractBundle {
 						 * Cannot use {@link Bundle#loadClass loadClass} method because
 						 * it would lead to a never ending recursice call (see {@link #START_ACTIVATION_POLICY})
 						 */
-						BundleClassLoader classLoader = getBundleClassLoader();
+						ClassLoader classLoader = getClassLoader();
 						
 						Class cls = classLoader.loadClass(className);
 						
@@ -629,7 +627,7 @@ class HostBundle extends AbstractBundle {
 			    		removable = false;
 					}
 	
-			    	((ExportedPackageImpl) exportedPackage).setRemovalPending(true);
+			    	((ExportedPackageImpl) exportedPackage).setRemovalPending0(true);
 			    }
 		    }
 		    
@@ -641,7 +639,7 @@ class HostBundle extends AbstractBundle {
 			    	if (requiredBundle.getBundle() == this) {
 			    		removable = false;
 			    		
-			    		((RequiredBundleImpl) requiredBundle).setRemovalPending(true);
+			    		((RequiredBundleImpl) requiredBundle).setRemovalPending0(true);
 			    		
 			    		break;
 			    	}
@@ -744,7 +742,7 @@ class HostBundle extends AbstractBundle {
 				    		removable = false;
 						}
 		
-				    	((ExportedPackageImpl) exportedPackage).setRemovalPending(true);
+				    	((ExportedPackageImpl) exportedPackage).setRemovalPending0(true);
 				    }
 			    }
 			    
@@ -756,7 +754,7 @@ class HostBundle extends AbstractBundle {
 				    	if (requiredBundle.getBundle() == HostBundle.this) {
 				    		removable = false;
 				    		
-				    		((RequiredBundleImpl) requiredBundle).setRemovalPending(true);
+				    		((RequiredBundleImpl) requiredBundle).setRemovalPending0(true);
 				    		
 				    		break;
 				    	}
@@ -851,7 +849,7 @@ class HostBundle extends AbstractBundle {
 	}
 	
 	// XXX
-	BundleClassLoader getBundleClassLoader() {
+	ClassLoader getClassLoader() {
 		if (classLoader == null) {
 			if (getState() == INSTALLED && getState() == UNINSTALLED) {
 				throw new IllegalStateException("Cannot create a class loader for an unresolved Bundle.");

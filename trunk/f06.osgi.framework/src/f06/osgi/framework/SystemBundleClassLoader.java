@@ -15,7 +15,6 @@
  */
 package f06.osgi.framework;
 
-
 class SystemBundleClassLoader extends BundleClassLoader {
 	
 	public SystemBundleClassLoader(ClassLoader parent, Framework framework, BundleURLClassPath[] classPaths) {

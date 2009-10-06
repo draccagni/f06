@@ -25,7 +25,6 @@ import org.osgi.service.startlevel.StartLevel;
 
 import f06.util.SerialExecutorService;
 
-
 public class StartLevelImpl implements StartLevel {
 
 	private Framework framework;

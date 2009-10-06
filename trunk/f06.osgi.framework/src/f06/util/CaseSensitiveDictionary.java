@@ -35,8 +35,6 @@ public class CaseSensitiveDictionary extends Dictionary {
 	private Map map;
 
 	public CaseSensitiveDictionary(boolean caseSensitive) {
-//		this.map = caseSensitive ? new TreeMap() : new TreeMap(new CaseInsensitiveComparator());
-//      XXX
 		this.map = caseSensitive ? 
 				(Map) new HashMap() : 
 				new TreeMap(new CaseInsensitiveComparator());

@@ -38,8 +38,57 @@ import f06.util.TextUtil;
  * BundleContent is defined for each bundle (host and fragment bundle) and permits
  * to access to jar file content
  */
-
 class BundleURLClassPathImpl implements BundleURLClassPath {
+	
+	private class UnclosableInputStream extends InputStream {
+		
+		InputStream delegate;
+		
+		public UnclosableInputStream (InputStream delegate) throws IOException {
+			this.delegate = delegate;
+		}
+
+		public void close () throws IOException {
+			// XXX do nothing
+		}
+		
+		public int read() throws IOException {
+			return delegate.read();
+		}
+		
+		public int available() throws IOException {
+			return delegate.available();
+		}
+		
+		public int hashCode() {
+			return delegate.hashCode();
+		}
+		
+		public synchronized void mark(int readlimit) {
+			delegate.mark(readlimit);
+		}
+		
+		public boolean markSupported() {
+			return delegate.markSupported();
+		}
+		
+		public int read(byte[] b) throws IOException {
+			return delegate.read(b);
+		}
+		
+		public int read(byte[] b, int off, int len) throws IOException {
+			return delegate.read(b, off, len);
+		}
+		
+		public synchronized void reset() throws IOException {
+			delegate.reset();
+		}
+		
+		public long skip(long n) throws IOException {
+			return delegate.skip(n);
+		}
+	}
+
 	
 	private Bundle bundle;
 	
@@ -238,6 +287,10 @@ class BundleURLClassPathImpl implements BundleURLClassPath {
 
 	public InputStream getEntryAsStream(int port, String name) throws IOException {
 		InputStream is = (InputStream) find(InputStream.class, port, name);
+		
+		if (is != null) {
+			is = new UnclosableInputStream(is);
+		}
 		
 		return is;
 	}

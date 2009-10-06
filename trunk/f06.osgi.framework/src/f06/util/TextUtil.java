@@ -15,7 +15,6 @@
  */
 package f06.util;
 
-
 public class TextUtil {
 	
 	public static String removeWhitespace(String in) {

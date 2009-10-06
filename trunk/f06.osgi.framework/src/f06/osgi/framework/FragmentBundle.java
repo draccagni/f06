@@ -30,7 +30,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 import org.osgi.service.log.LogService;
 import org.osgi.service.packageadmin.ExportedPackage;
-import org.osgi.service.packageadmin.PackageAdmin;
 
 import f06.util.ManifestEntry;
 
@@ -157,7 +156,7 @@ class FragmentBundle extends AbstractBundle {
 									removable = false;
 								}
 								
-								((ExportedPackageImpl) exportedPackage).setRemovalPending(true);
+								((ExportedPackageImpl) exportedPackage).setRemovalPending0(true);
 								
 								break;
 							}
@@ -249,7 +248,7 @@ class FragmentBundle extends AbstractBundle {
 					ExportedPackage[] oldExportedPackages = framework.getExportedPackages(e.getName());
 				    if (oldExportedPackages != null) {
 					    for (int j = 0; j < oldExportedPackages.length; j++) {
-					    	((ExportedPackageImpl) oldExportedPackages[j]).setRemovalPending(true);
+					    	((ExportedPackageImpl) oldExportedPackages[j]).setRemovalPending0(true);
 					    }
 				    }
 				}

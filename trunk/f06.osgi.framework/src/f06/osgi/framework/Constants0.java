@@ -15,8 +15,6 @@
  */
 package f06.osgi.framework;
 
-
-
 interface Constants0 {
 	
 	final static String LISTENERCLASS                           = "listenerClass";

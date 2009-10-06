@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-
-
 public class ManifestEntry {
 	
 	private static Map parsedEntries = new HashMap();

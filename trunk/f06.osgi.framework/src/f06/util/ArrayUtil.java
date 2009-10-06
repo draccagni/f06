@@ -21,7 +21,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class ArrayUtil {
-
+	
 	public static Object[] add(Object[] array, Object item) {
 		synchronized (array) {
 			Object[] newArray = copyOf(array, array.length + 1);

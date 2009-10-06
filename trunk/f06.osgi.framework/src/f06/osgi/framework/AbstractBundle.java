@@ -67,7 +67,6 @@ abstract class AbstractBundle implements Bundle {
 	/*
 	 * 4.3.12
 	 * 
-	 * 
 	 * JavaDoc  Returns entries in this bundle and its attached fragments. This bundle's
 	 * classloader is not used to search for entries. Only the contents of this bundle 
 	 * and its attached fragments are searched for the specified entries.
@@ -363,11 +362,11 @@ abstract class AbstractBundle implements Bundle {
 		return obj == this;
 	}
 	
-	public boolean isStale() {
+	boolean isStale0() {
 		return stale;
 	}
 	
-	public void setStale(boolean stale) {
+	void setStale0(boolean stale) {
 		this.stale = stale;
 	}
 	

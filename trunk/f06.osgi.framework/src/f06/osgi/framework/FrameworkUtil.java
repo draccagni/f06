@@ -29,7 +29,6 @@ import org.osgi.framework.InvalidSyntaxException;
 
 import f06.util.ManifestEntry;
 
-
 public class FrameworkUtil {
 	
 	private static class FilterFactory {

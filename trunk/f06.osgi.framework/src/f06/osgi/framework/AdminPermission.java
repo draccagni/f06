@@ -25,7 +25,6 @@ import f06.util.CaseSensitiveDictionary;
 
 public final class AdminPermission extends Permission {
 
-
 	/**
 	 * 
 	 */

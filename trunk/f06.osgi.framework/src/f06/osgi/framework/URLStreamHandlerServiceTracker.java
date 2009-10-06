@@ -24,7 +24,7 @@ import org.osgi.service.url.URLStreamHandlerService;
 import org.osgi.util.tracker.ServiceTracker;
 
 class URLStreamHandlerServiceTracker extends ServiceTracker {
-
+	
 	public URLStreamHandlerServiceTracker(BundleContext context) {
 		super(context, URLStreamHandlerService.class.getName(), null);
 	}

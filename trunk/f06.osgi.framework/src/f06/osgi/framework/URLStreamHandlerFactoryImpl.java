@@ -23,21 +23,16 @@ import org.osgi.service.url.URLStreamHandlerService;
 
 class URLStreamHandlerFactoryImpl implements URLStreamHandlerFactory {
 
-	public static URLStreamHandlerFactoryImpl instance = new URLStreamHandlerFactoryImpl();
-	
 	private URLStreamHandlerServiceTracker tracker;
 
-	private URLStreamHandlerFactoryImpl() {
-	}
-
-	public void setContext(BundleContext context) {
-		tracker = new URLStreamHandlerServiceTracker(context);
+	URLStreamHandlerFactoryImpl(BundleContext context) {
+		this.tracker = new URLStreamHandlerServiceTracker(context);
 	}
 	
 	public URLStreamHandler createURLStreamHandler(String protocol) {
-		tracker.open();
+		this.tracker.open();
 		
-		URLStreamHandlerService service = tracker.getURLStreamHandlerService(protocol);
+		URLStreamHandlerService service = this.tracker.getURLStreamHandlerService(protocol);
 
 		if (service != null) {
 			return new URLStreamHandlerProxy(service);

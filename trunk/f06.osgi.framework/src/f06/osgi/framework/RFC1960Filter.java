@@ -32,7 +32,6 @@ import f06.util.ArrayUtil;
 import f06.util.CaseSensitiveDictionary;
 import f06.util.TextUtil;
 
-
 class RFC1960Filter implements Filter {
 
 	protected static final int NONE      = 0x0000;

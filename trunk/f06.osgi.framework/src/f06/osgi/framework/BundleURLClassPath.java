@@ -27,7 +27,6 @@ import org.osgi.framework.Version;
  * BundleContent is defined for each bundle (host and fragment bundle) and permits
  * to access to jar file content
  */
-
 interface BundleURLClassPath {
 	
 	public Bundle getBundle();

@@ -16,7 +16,6 @@
 package f06.osgi.framework;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 import org.osgi.service.packageadmin.RequiredBundle;
 
@@ -52,11 +51,11 @@ class RequiredBundleImpl implements RequiredBundle {
 		return removalPending;
 	}
 
-	public void setRemovalPending(boolean removalPending) {
+	void setRemovalPending0(boolean removalPending) {
 		this.removalPending = removalPending;
 	}
 	
-	public void setRequiringBundles(Bundle[] requiringBundles) {
+	void setRequiringBundles0(Bundle[] requiringBundles) {
 		this.requiringBundles = requiringBundles;
 	}
 

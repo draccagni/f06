@@ -27,6 +27,7 @@ import org.osgi.framework.Version;
 public class BundleURLConnection extends URLConnection {
 	
 	private Framework framework;
+	
 	private InputStream is;
 	
 	public BundleURLConnection(Framework framework, URL url) {
@@ -40,6 +41,7 @@ public class BundleURLConnection extends URLConnection {
 			String host = url.getHost();
 			
 			Bundle bundle;
+			
 			String version;
 			
 			int i = host.indexOf('.');

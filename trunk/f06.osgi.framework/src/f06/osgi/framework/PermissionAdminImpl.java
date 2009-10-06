@@ -25,7 +25,6 @@ import org.osgi.service.permissionadmin.PermissionInfo;
 
 import f06.util.ArrayUtil;
 
-
 class PermissionAdminImpl implements PermissionAdmin {
 
 	public static final PermissionInfo[] ALL_PERMISSIONS = new PermissionInfo[] {

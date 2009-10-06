@@ -26,7 +26,6 @@ public class ListenerHookInfoImpl implements ListenerHook.ListenerInfo {
 	
 	private boolean removed;
 	
-	
 	public ListenerHookInfoImpl(BundleContext context, String filter) {
 		this.context = context;
 		this.filter = filter;

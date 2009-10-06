@@ -27,7 +27,6 @@ import org.osgi.service.event.Event;
 
 import f06.util.CaseSensitiveDictionary;
 
-
 class EventFactory {
 
 	public static Event createEvent(FrameworkEvent frameworkEvent) {

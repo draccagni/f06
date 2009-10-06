@@ -61,7 +61,6 @@ import f06.util.CaseSensitiveDictionary;
  *   Receive notifications when services become registered or unregistered.
  *   
  */
-
 class ServiceRegistry {
 	
 	private static Comparator referencesComparator = new Comparator() {
