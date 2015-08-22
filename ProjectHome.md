@@ -1,0 +1,1 @@
+The purpose of this project is to develop an experimental implementation of OSGi Service Platform RX.Y specification.
